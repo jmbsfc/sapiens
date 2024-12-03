@@ -1,0 +1,19 @@
+.mat-toolbar{
+    background: rgb(2,0,36);
+    background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,121,54,0.8519782913165266) 0%, rgba(4,176,154,0.8995973389355743) 50%, rgba(9,121,54,0.835171568627451) 100%);
+    color:white;
+    flex-direction: row;
+    justify-content: space-between;
+    position: sticky;
+    
+    margin: auto;
+    top: 20px;
+    padding: 0px 40px;
+    border-radius: 50px;
+    width: 85%;
+
+}
+
+.container-navbar a{
+    color:white;
+}
