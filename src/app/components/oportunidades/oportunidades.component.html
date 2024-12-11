@@ -1,1 +1,4 @@
-<p>oportunidades works!</p>
+<div class="container-cards">
+    <!-- os ngFor, ngIf, ngClass etc são coisas do angular que simplificam a cena -->
+    <app-card *ngFor="let card of data" [cardData]="card"></app-card>
+</div>

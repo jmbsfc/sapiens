@@ -1,0 +1,51 @@
+[
+    {
+        "id": 1,
+        "full_name": "Killie Larimer",
+        "email": "klarimer0@yandex.ru",
+        "password": "fV5ZNV=\"",
+        "profile_picture": "http://dummyimage.com/100x100.png/cc0000/ffffff",
+        "birthday": "6/29/1931",
+        "phone_number": "758 579 0981",
+        "citizen_number": 74142155
+    },
+    {
+        "id": 2,
+        "full_name": "Priscilla Tremellier",
+        "email": "ptremellier1@cnbc.com",
+        "password": "eN6Ul&cIcsU3)1(",
+        "profile_picture": "http://dummyimage.com/100x100.png/ff4444/ffffff",
+        "birthday": "5/12/1963",
+        "phone_number": "985 522 0623",
+        "citizen_number": 63525295
+    },
+    {
+        "id": 3,
+        "full_name": "Thornton Danielian",
+        "email": "tdanielian2@vimeo.com",
+        "password": "mA08Vxh4BUKR",
+        "profile_picture": "http://dummyimage.com/100x100.png/dddddd/000000",
+        "birthday": "6/29/1985",
+        "phone_number": "904 352 8516",
+        "citizen_number": 47427877
+    },
+    {
+        "id": 4,
+        "email": "bhoudhury3@sphinn.com",
+        "password": "cR07+8WOW<0m",
+        "profile_picture": "http://dummyimage.com/100x100.png/5fa2dd/ffffff",
+        "birthday": "2/10/1992",
+        "phone_number": "256 946 9694",
+        "citizen_number": 24817494
+    },
+    {
+        "id": 5,
+        "full_name": "Bond Beccera",
+        "email": "bbeccera4@nhs.uk",
+        "password": "dR0jq*.Q#$uU&#pX",
+        "profile_picture": "http://dummyimage.com/100x100.png/5fa2dd/ffffff",
+        "birthday": "7/12/1940",
+        "phone_number": "624 378 8196",
+        "citizen_number": 73197957
+    }
+]
