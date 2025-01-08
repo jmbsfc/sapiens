@@ -1,12 +1,14 @@
 .card {
-    width:220px;
+    width:240px;
     height: 350px;
     display: flex;
     flex-direction: column;
+    flex-basis: calc(100% / 4);
     justify-content: flex-start;
     border: 1px solid var(--grey-color);
     border-radius: 10px;
     box-shadow: 0 2px 4px 0 rgba(0,0,0,.2);
+    transition: transform 250ms;
 }
 
 .card-img {
@@ -35,11 +37,16 @@
 }
 
 .card-location {
-    margin-top: 16px;
+    margin-top: 48px;
     display: flex;
     flex-direction: row;
     align-items: center;
     color: var(--grey-color);
     font-size: 12px;
     text-overflow: ellipsis;
+}
+
+.card:hover{
+    cursor: pointer;
+    transform: translateY(-10px);
 }
