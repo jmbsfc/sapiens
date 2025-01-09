@@ -1,43 +1,37 @@
 .card {
     width:240px;
     height: 350px;
+
     display: flex;
     flex-direction: column;
-    flex-basis: calc(100% / 4);
-    justify-content: flex-start;
-    border: 1px solid var(--grey-color);
-    border-radius: 10px;
+    
+    border: 1px solid black;
+    
     box-shadow: 0 2px 4px 0 rgba(0,0,0,.2);
     transition: transform 250ms;
 }
 
 .card-img {
-    height: 50%;
     width: 100%;
-    overflow: hidden;
-    border-radius: 10px 10px 0 0;
+    height: 50%;
 }
 
 .card-img img {
     width: 100%;
-    object-fit: cover;
+    height: 100%;
 }
 
 .card-info {
-    height: 50%;
-    padding: 16px;
-    overflow: hidden;
-    }
-    
+    padding: 12px;
+}
+
 .card-info p {
-    max-height: 120px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .card-location {
-    margin-top: 48px;
     display: flex;
     flex-direction: row;
     align-items: center;
