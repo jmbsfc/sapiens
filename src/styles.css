@@ -7,3 +7,9 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     /* --primary-color:  */
     --grey-color: #555
 }
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
