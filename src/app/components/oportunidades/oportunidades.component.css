@@ -1,17 +1,9 @@
 .container-cards {
-    /*display: flex;
-    flex-wrap: wrap;
-    gap: 40px;
-    padding: 64px;*/
-
-    /*display: grid;
-    
-    grid-template-columns: repeat(4, 1fr);*/
 
     display: flex;
     flex-wrap: wrap;
-    margin-left: 15%;
-    margin-right: 15%;
+    margin-left: 10%;
+    margin-right: 10%;
     justify-content: center;  
     gap: 40px;
     padding: 64px;
