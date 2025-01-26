@@ -5,11 +5,43 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 :root{
     /* --primary-color:  */
-    --grey-color: #555
+    --grey-color: #555;
+    --blue-color: #64cbfd;
+    --lightgreen-color:#aaee7d;
+    --darkgreen-color:#007979;
+    --light-color: #eee;
+    --dark-color: #222;
 }
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+
+    scrollbar-width: 7px;
+   /* scrollbar-color: #007979 #ffffff;
+    scroll-behavior: smooth;
+    background-color: transparent; */
+}
+
+/* Chrome, Edge, and Safari */
+
+*::-webkit-scrollbar {
+    width: 10px;
+    background-color: transparent;
+}
+
+*::-webkit-scrollbar-track {
+    border-radius: 8px;
+    background-color: transparent;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 8px !important;
+    border: 0px dotted #007979;
 }
