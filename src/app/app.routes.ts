@@ -4,10 +4,12 @@ import { OportunidadesComponent } from './components/oportunidades/oportunidades
 import { LoginComponent } from './components/login/login.component';
 import { authGuard } from './guards/auth.guard';
 import { LandingpageComponent } from './components/landingpage/landingpage.component';
+import { SignupComponent } from './components/signup/signup.component';
 
 export const routes: Routes = [
     {path:'', component:LandingpageComponent},
     {path:'perfil', component: PerfilComponent, canActivate: [authGuard]}, 
     {path:'oportunidades', component: OportunidadesComponent, canActivate: [authGuard]},
-    {path:'login', component: LoginComponent}
+    {path:'login', component: LoginComponent},
+    {path:'signup',component: SignupComponent}
 ];
