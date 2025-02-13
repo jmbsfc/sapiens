@@ -1,22 +1,40 @@
 <div class="login-page-container">
     <div class="login-container">
         <h1>Criar Conta de Voluntário</h1>
-        <form>
-            <label for="fullname">Nome:</label>
-            <input type="text" id="fullname" name="fullname" placeholder="Enter your full name" required>
+        <form (ngSubmit)="onSubmit()">
+            <div *ngIf="step === 1">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" placeholder="Coloque o seu email" [(ngModel)]="formData.email" required>
 
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" placeholder="Crie uma password" [(ngModel)]="formData.password" required>
 
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" placeholder="Create a password" required>
+                <label for="profilePicture">Foto de Perfil:</label>
+                <input type="file" id="profilePicture" name="profilePicture" (change)="onFileChange($event)" accept="image/*">
 
-            <label for="confirm-password">Confir:</label>
-            <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password"
-                required>
+                <button type="button" (click)="nextStep()">Próximo</button>
+            </div>
 
-            <button type="submit">Sign Up</button>
+            <div *ngIf="step === 2">
+                <label for="firstname">Nome:</label>
+                <input type="text" id="firstname" name="firstname" placeholder="Coloque o seu nome próprio" [(ngModel)]="formData.firstname" required>
+
+                <label for="lastname">Nome:</label>
+                <input type="text" id="lastname" name="lastname" placeholder="Coloque o seu sobrenome" [(ngModel)]="formData.lastname" required>
+
+                <label for="phone">Telefone:</label>
+                <input type="tel" id="phone" name="phone" placeholder="Coloque o seu telefone" [(ngModel)]="formData.phone" required>
+
+                <label for="civilId">ID Civil:</label>
+                <input type="text" id="civilId" name="civilId" placeholder="Coloque o seu ID civil" [(ngModel)]="formData.civilId" required>
+
+                <label for="birthdate">Data de Nascimento:</label>
+                <input type="date" id="birthdate" name="birthdate" [(ngModel)]="formData.birthdate" required>
+
+                <button type="button" (click)="prevStep()">Voltar</button>
+                <button type="submit">Sign Up</button>
+            </div>
         </form>
-        <p>Already have an account? <a href="/login">Login</a></p>
+        <p>Já tem uma conta? <a href="/login">Login</a></p>
     </div>
 </div>
