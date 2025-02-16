@@ -12,7 +12,7 @@ import { AcctypepickerComponent } from './components/acctypepicker/acctypepicker
 export const routes: Routes = [
     {path:'', component:LandingpageComponent},
     {path:'perfil', component: PerfilComponent, canActivate: [authGuard]}, 
-    {path:'oportunidades', component: OportunidadesComponent, canActivate: [authGuard]},
+    {path:'oportunidades', component: OportunidadesComponent},
     {path:'login', component: LoginComponent},
     {path:'signup',component: SignupComponent},
     {path:"orgsignup", component: OrgsignupComponent},

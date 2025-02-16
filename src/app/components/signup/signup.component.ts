@@ -1,14 +1,19 @@
+import { NgIf } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-signup',
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.css'],
   standalone: true,
-  imports: [FormsModule] // Importa FormsModule diretamente no componente
+  imports: [FormsModule, NgIf] // Importa FormsModule diretamente no componente
 })
 export class SignupComponent {
+
+  constructor(private authService: AuthService) {}
+
   step: number = 1;
   formData: any = {
     firstname: '',
@@ -16,7 +21,7 @@ export class SignupComponent {
     email: '',
     password: '',
     profilePicture: null,
-    phone: '',
+    phoneNumber: '',
     civilId: '',
     birthdate: ''
   };
@@ -42,6 +47,19 @@ export class SignupComponent {
 
   onSubmit() {
     console.log('Form Data:', this.formData);
-    // Adicionar logica
+
+    this.authService.signup({
+      firstname: this.formData.firstname,
+      lastname: this.formData.lastname,
+      email: this.formData.email,
+      password: this.formData.password,
+      profilePicture: "null",
+      phoneNumber: this.formData.phoneNumber,
+      civilId: this.formData.civilId,
+      birthdate: this.formData.birthdate,
+      role: "VOLUNTEER",
+    })
+
+    // Adicionar logica 
   }
 }

@@ -57,10 +57,20 @@
 
 }
 
+.org-button, .vol-button{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 60px
+}
+
 .acc-type-buttons a{
   text-decoration: none;
   color: #007979;
 }
 
-.acc-type-buttons img{
+.acc-type-buttons-img{
+  height: 200px;
+
 }
