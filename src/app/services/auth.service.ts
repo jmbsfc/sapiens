@@ -6,12 +6,12 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = "http://localhost:8080/auth"
+  private apiUrl = "http://localhost:8080"
 
   constructor(private http: HttpClient, private router: Router) { }
   
-  signup(formData: { firstname: string; lastname: string; role: string, email: string; password: string; profilePicture: any; phoneNumber: string; civilId: string; birthdate: string; }) {
-    return this.http.post(`${this.apiUrl}/signup`, formData)
+  signup(formData: { firstName: string; lastName: string; role: string, email: string; password: string; imageUrl: any; phoneNumber: string; civilId: string; birthday: string; }) {
+    return this.http.post(`${this.apiUrl}/volunteers/create`, formData)
       .subscribe((response) => {
         console.log('Signup successful', response)
         this.router.navigate(['/login']);
@@ -30,7 +30,7 @@ export class AuthService {
         localStorage.setItem('authToken', response.token);
         this.router.navigate(['/']);
       })
-      
+  }  
 
   /**
    * Logs the user out of the system.
@@ -43,9 +43,9 @@ export class AuthService {
   /**
    * Checks if user is authenticated.
    */
-  isAuthenticated(): boolean {
+    isAuthenticated(): boolean { 
     const token = localStorage.getItem("authToken");
     return !!token;
   }
-  
+    
 }

@@ -49,14 +49,14 @@ export class SignupComponent {
     console.log('Form Data:', this.formData);
 
     this.authService.signup({
-      firstname: this.formData.firstname,
-      lastname: this.formData.lastname,
+      firstName: this.formData.firstname,
+      lastName: this.formData.lastname,
       email: this.formData.email,
       password: this.formData.password,
-      profilePicture: "null",
+      imageUrl: "n",
       phoneNumber: this.formData.phoneNumber,
       civilId: this.formData.civilId,
-      birthdate: this.formData.birthdate,
+      birthday: this.formData.birthdate,
       role: "VOLUNTEER",
     })
 
