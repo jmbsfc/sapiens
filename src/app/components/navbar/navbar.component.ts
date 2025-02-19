@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import {MatToolbarModule} from '@angular/material/toolbar';
-import {MatButtonModule} from '@angular/material/button';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatButtonModule } from '@angular/material/button';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -10,7 +11,16 @@ import {MatButtonModule} from '@angular/material/button';
   styleUrl: './navbar.component.css'
 })
 export class NavbarComponent implements OnInit {
-  ngOnInit(){
+  isLoggedIn: boolean = false;
 
+  constructor(private authService: AuthService) {}
+
+  ngOnInit() {
+    this.isLoggedIn = this.authService.isAuthenticated();
+  }
+
+  // Add a method to toggle login status for demonstration purposes
+  toggleLogin() {
+    this.isLoggedIn = !this.isLoggedIn;
   }
 }

@@ -7,9 +7,7 @@
             <a routerLink="/oportunidades">Oportunidades</a>
         </span>
         <span class="container-navbar-item">
-            <a routerLink="/perfil">Criar Conta</a>
+            <a routerLink="/perfil">{{ isLoggedIn ? 'Perfil' : 'Criar Conta' }}</a>
         </span>
     </div>
-
-
-  </mat-toolbar>
+</mat-toolbar>

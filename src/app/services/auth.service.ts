@@ -21,6 +21,17 @@ export class AuthService {
       }
     )
   }
+  orgsignup(formData: { name: string; website: string; role: string, email: string; password: string; imageUrl: any; phoneNumber: string; address: string; }) {
+    return this.http.post(`${this.apiUrl}/organizations/create`, formData)
+      .subscribe((response) => {
+        console.log('Signup successful', response)
+        this.router.navigate(['/login']);
+      },
+      (error) => {
+        console.log('Error', error)
+      }
+    )
+  }
   /**
    * Logs the user into the system.
    */
