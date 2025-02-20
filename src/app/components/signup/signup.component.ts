@@ -56,8 +56,7 @@ export class SignupComponent {
       imageUrl: "n",
       phoneNumber: this.formData.phoneNumber,
       civilId: this.formData.civilId,
-      birthday: this.formData.birthdate,
-      role: "VOLUNTEER",
+      birthday: this.formData.birthdate
     })
 
     // Adicionar logica 

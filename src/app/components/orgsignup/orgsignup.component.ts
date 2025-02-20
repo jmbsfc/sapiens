@@ -53,7 +53,6 @@ export class OrgsignupComponent {
         imageUrl: "n",
         phoneNumber: this.formData.phoneNumber,
         address: this.formData.address,
-        role: "ORGANIZATION",
       })
   
       // Adicionar logica 

@@ -10,8 +10,8 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router) { }
   
-  signup(formData: { firstName: string; lastName: string; role: string, email: string; password: string; imageUrl: any; phoneNumber: string; civilId: string; birthday: string; }) {
-    return this.http.post(`${this.apiUrl}/volunteers/create`, formData)
+  signup(formData: { firstName: string; lastName: string; email: string; password: string; imageUrl: any; phoneNumber: string; civilId: string; birthday: string; }) {
+    return this.http.post(`${this.apiUrl}/volunteers`, formData)
       .subscribe((response) => {
         console.log('Signup successful', response)
         this.router.navigate(['/login']);
@@ -21,8 +21,9 @@ export class AuthService {
       }
     )
   }
-  orgsignup(formData: { name: string; website: string; role: string, email: string; password: string; imageUrl: any; phoneNumber: string; address: string; }) {
-    return this.http.post(`${this.apiUrl}/organizations/create`, formData)
+  
+  orgsignup(formData: { name: string; website: string; email: string; password: string; imageUrl: any; phoneNumber: string; address: string; }) {
+    return this.http.post(`${this.apiUrl}/organizations`, formData)
       .subscribe((response) => {
         console.log('Signup successful', response)
         this.router.navigate(['/login']);
