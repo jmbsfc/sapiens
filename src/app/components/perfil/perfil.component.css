@@ -1,0 +1,39 @@
+.profile-container {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 20px;
+    text-align: left;
+    margin-top: 50px; /* Add margin to lower the content */
+    margin-left: 20%;
+}
+
+.profile-picture {
+    margin-right: 20px;
+    position: relative;
+    top: 0;
+    left: 0;
+}
+
+.profile-picture img {
+    width: 240px; /* Adjust width */
+    height: 240px; /* Adjust height */
+    border-radius: 18px; 
+    object-fit: cover;
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.profile-info h1 {
+    margin: 10px 0;
+    font-size: 40px; /* Increase font size */
+}
+
+.lastName {
+    margin: 10px 0;
+    font-size: 60px; /* Increase font size */
+}

@@ -1,26 +1,29 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../services/auth.service';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, MatToolbarModule, MatButtonModule],
+  imports: [RouterLink, MatToolbarModule, MatButtonModule, NgIf],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
 export class NavbarComponent implements OnInit {
   isLoggedIn: boolean = false;
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
-    this.isLoggedIn = this.authService.isAuthenticated();
+    this.authService.isAuthenticated$.subscribe(isAuthenticated => {
+      this.isLoggedIn = isAuthenticated;
+      this.cdr.detectChanges(); // Trigger change detection
+    });
   }
 
-  // Add a method to toggle login status for demonstration purposes
-  toggleLogin() {
-    this.isLoggedIn = !this.isLoggedIn;
+  logout() {
+    this.authService.logout();
   }
 }

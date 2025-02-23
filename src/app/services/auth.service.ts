@@ -1,12 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private apiUrl = "http://localhost:8080"
+  private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.isAuthenticated());
+  isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
   constructor(private http: HttpClient, private router: Router) { }
   
@@ -37,9 +40,11 @@ export class AuthService {
    * Logs the user into the system.
    */
   login(credentials: { email: string, password: string }) {
-    return this.http.post<{token: string}>(`${this.apiUrl}/login`, credentials)
+    return this.http.post<{data: string}>(`${this.apiUrl}/auth`, credentials)
       .subscribe((response) => {
-        localStorage.setItem('authToken', response.token);
+        localStorage.setItem('authToken', response.data);
+        console.log(response);
+        this.isAuthenticatedSubject.next(true);
         this.router.navigate(['/']);
       })
   }  
@@ -49,6 +54,7 @@ export class AuthService {
    */
   logout(): void {
     localStorage.removeItem('authToken');
+    this.isAuthenticatedSubject.next(false);
     this.router.navigate(['/login']);
   }
 

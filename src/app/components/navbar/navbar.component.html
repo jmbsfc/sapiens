@@ -9,5 +9,8 @@
         <span class="container-navbar-item">
             <a routerLink="/perfil">{{ isLoggedIn ? 'Perfil' : 'Criar Conta' }}</a>
         </span>
+        <span class="container-navbar-item">
+            <a *ngIf="isLoggedIn" (click)="logout()">Sair</a>
+        </span>
     </div>
 </mat-toolbar>
