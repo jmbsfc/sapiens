@@ -29,6 +29,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    margin-top: 24px;
 }
 
 .card-location {
@@ -39,6 +40,7 @@
     font-size: 12px;
     text-overflow: ellipsis;
     transition: transform 0.1s ease-in-out;
+    margin-top: 48px;
 }
 
 .card:hover{

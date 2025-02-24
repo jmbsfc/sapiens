@@ -11,13 +11,12 @@ import { NgFor } from '@angular/common';
   styleUrl: './oportunidades.component.css'
 })
 export class OportunidadesComponent implements OnInit {
-  // vou criar uma variável para os dados
   data: any;
 
   constructor(private oportunidadesService: OportunidadesService) {}
   
   ngOnInit(){
-    // aqui vou aribuir os dados do serviçao aka JSON à variável
+    // aqui vou aribuir os dados do serviços aka JSON à variável
     this.oportunidadesService.getJSON().subscribe(data => {
       this.data = data;
       this.data.map((oneData:any) => 
