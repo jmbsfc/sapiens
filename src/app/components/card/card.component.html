@@ -1,14 +1,22 @@
-<div class="card">
+<div class="card" (click)="openModal()">
     <div class="card-img">
-        <img src="https://cdn.britannica.com/70/234870-050-D4D024BB/Orange-colored-cat-yawns-displaying-teeth.jpg" />
+        <img src="cardplaceholder.png" />
     </div>
 
     <div class="card-info">
         <h3>{{cardData.title}}</h3>
         <p>{{cardData.description}}</p>
         <div class="card-location">
+            <img src="marker.png" alt="">
             <p>{{cardData.address}}</p>
         </div>
+    </div>
+</div>
+
+<div class="modal" [class.show]="isModalOpen">
+    <div class="modal-content">
+        <span class="close" (click)="closeModal()">&times;</span>
+        <p>Modal content goes here...</p>
     </div>
 </div>
 

@@ -1,3 +1,30 @@
+<div class="dropdown-container">
+    <div class="create-opportunity">
+        <a>
+            Criar Oportunidade
+        </a>
+    </div>
+    <div class="dropdown">
+        <select class="dropdown-select">
+            <option class="dropdown-option" value="" disabled selected>Área de Intervenção
+            </option>
+            <option class="dropdown-option" value="option1">Option 1</option>
+            <option class="dropdown-option" value="option2">Option 2</option>
+        </select>
+    </div>
+    <div class="dropdown">
+        <select class="dropdown-select">
+            <option class="dropdown-option" value="" disabled selected>Localização</option>
+            <option class="dropdown-option" value="option1">Option 1</option>
+            <option class="dropdown-option" value="option2">Option 2</option>
+        </select>
+    </div>
+    <div class="apply-filter">
+        <a>
+            Aplicar Filtros
+        </a>
+    </div>
+</div>
 <div class="container-cards">
     <!-- os ngFor, ngIf, ngClass etc são coisas do angular que simplificam a cena -->
     <app-card *ngFor="let card of data" [cardData]="card"></app-card>

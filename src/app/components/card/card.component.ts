@@ -4,9 +4,17 @@ import { Component, Input } from '@angular/core';
   selector: 'app-card',
   imports: [],
   templateUrl: './card.component.html',
-  styleUrl: './card.component.css',
+  styleUrls: ['./card.component.css'],
 })
-export class CardComponent{
+export class CardComponent {
+  @Input() cardData: any = {};
+  isModalOpen = false;
 
-  @Input() cardData:any= {}
+  openModal() {
+    this.isModalOpen = true;
+  }
+
+  closeModal() {
+    this.isModalOpen = false;
+  }
 }
