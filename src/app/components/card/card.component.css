@@ -10,6 +10,20 @@
     box-shadow: 0 2px 4px 0 rgba(0,0,0,.2);
     transition: transform 250ms;
     z-index: 1;
+
+    position: relative
+}
+
+.card-tag{
+    background: var(--lightgreen-color);
+    color: var(--darkgreen-color);
+    width: 68px;
+    border-radius: 12px;
+    position: absolute;
+    text-align: center;
+    right: 6px;
+    top:6px;
+    padding: 6px
 }
 
 .card-img {

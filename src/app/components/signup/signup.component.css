@@ -15,6 +15,7 @@
   }
   
   .login-container {
+    margin-top: 40px;
     background: #fff;
     padding: 2rem;
     border-radius: 10px;
@@ -56,7 +57,7 @@
     font-size: 1rem;
     cursor: pointer;
     transition: 0.3s ease;
-    margin-top: 8px;
+    margin-top: 4px;
   }
   
   .login-container button:hover {

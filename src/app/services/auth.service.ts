@@ -46,6 +46,9 @@ export class AuthService {
         console.log(response);
         this.isAuthenticatedSubject.next(true);
         this.router.navigate(['/']);
+      },
+      (error) => {
+        console.log('Error', error)
       })
   }  
 
@@ -61,9 +64,17 @@ export class AuthService {
   /**
    * Checks if user is authenticated.
    */
-    isAuthenticated(): boolean { 
+  isAuthenticated(): boolean { 
     const token = localStorage.getItem("authToken");
     return !!token;
+  }
+
+  /**
+   * Checks if the user is an organization account.
+   */
+  isOrgAccount(): any {
+    const token = localStorage.getItem('authToken');
+    return token && token.includes('organization');
   }
     
 }

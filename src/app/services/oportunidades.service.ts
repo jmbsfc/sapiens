@@ -7,14 +7,38 @@ import { Observable } from 'rxjs';
 })
 export class OportunidadesService {
 
+  private apiUrl = "http://localhost:8080";
+
   constructor(private http:HttpClient) {
-    this.getJSON().subscribe(data => {
+    this.getOportunities().subscribe(data => {
       console.log(data);
   });
   }
 
-  public getJSON(): Observable<any> {
-      return this.http.get("./assets/offers.json")  
+  public getOportunities(): Observable<any> {
+      return this.http.get<{data: any}>(`${this.apiUrl}/offers`);
 
+  }
+  public getMunicipalities(): Observable<{data:any}> {
+    return this.http.get<{data: any}>(`${this.apiUrl}/municipalities`);
+  }
+
+  public getCategories(): Observable<{data:any}> {
+    return this.http.get<{data: any}>(`${this.apiUrl}/categories`);
+  }
+
+  public createOpportunity(formData: { title: string; address: string; description: string; categoryId: string; municipalityId: string; startDate: string | null; endDate: string | null; }) {
+    return this.http.post(`${this.apiUrl}/offers`, formData)
+  }
+
+  public getOrgOpportunities(orgId: string){
+    let opportunities = this.getOportunities();
+    let orgOpportunities:any = []
+    opportunities.forEach(opportunity => {
+      if(opportunity.organization.id === orgId){
+        orgOpportunities.push(opportunity)
+      }
+    })
+    return orgOpportunities
   }
 }

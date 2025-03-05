@@ -9,9 +9,28 @@ import { Observable } from 'rxjs';
 export class VolunteerService {
   private apiUrl = "http://localhost:8080";
 
+  volunteerInfo: any = {
+    firstName: "",
+    lastName: "",
+    email: "",
+    imageUrl: "",
+    phoneNumber: "",
+    civilId: "",
+    birthday: ""
+  };
+
   constructor(private http: HttpClient, private router: Router) { }
 
   getProfileInfo(): Observable<{data: any}> {
     return this.http.get<{data: any}>(`${this.apiUrl}/volunteers/me`);
   }
+
+  getVolunteerInfo(): any {
+    return this.volunteerInfo;
+  };
+
+  setVolunteerInfo(): void {
+    this.volunteerInfo = this.getProfileInfo;
+    this.volunteerInfo.isOrgAccount = false;
+  };
 }

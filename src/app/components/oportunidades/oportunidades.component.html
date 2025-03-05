@@ -1,22 +1,17 @@
 <div class="dropdown-container">
-    <div class="create-opportunity">
-        <a>
-            Criar Oportunidade
-        </a>
+    <div *ngIf="isOrgAccount" class="create-opportunity">
+        <a (click)="openModal()">Criar Oportunidade</a>
     </div>
     <div class="dropdown">
-        <select class="dropdown-select">
-            <option class="dropdown-option" value="" disabled selected>Área de Intervenção
-            </option>
-            <option class="dropdown-option" value="option1">Option 1</option>
-            <option class="dropdown-option" value="option2">Option 2</option>
+        <select class="dropdown-select" [(ngModel)]="selectedCategory" (change)="onCategoryChange($event)">
+            <option class="dropdown-option" value="" disabled selected>Área de Intervenção</option>
+            <option class="dropdown-option" *ngFor="let option of categoriesData" [value]="option.id">{{option.name}}</option>
         </select>
     </div>
     <div class="dropdown">
-        <select class="dropdown-select">
+        <select class="dropdown-select" [(ngModel)]="selectedMunicipality" (change)="onMunicipalityChange($event)">
             <option class="dropdown-option" value="" disabled selected>Localização</option>
-            <option class="dropdown-option" value="option1">Option 1</option>
-            <option class="dropdown-option" value="option2">Option 2</option>
+            <option class="dropdown-option" *ngFor="let option of municipalitiesData" [value]="option.id">{{option.name}}</option>
         </select>
     </div>
     <div class="apply-filter">
@@ -27,5 +22,41 @@
 </div>
 <div class="container-cards">
     <!-- os ngFor, ngIf, ngClass etc são coisas do angular que simplificam a cena -->
-    <app-card *ngFor="let card of data" [cardData]="card"></app-card>
+    <app-card *ngFor="let card of data" [cardData]="card" [isOrgAccount]="isOrgAccount" [profileInfo]="profileInfo"></app-card>
+</div>
+
+<!-- Modal for creating an opportunity -->
+<div *ngIf="isModalOpen" class="modal">
+    <div class="modal-content">
+        <span class="close" (click)="closeModal()">&times;</span>
+        <h2>Criar Oportunidade</h2>
+        <form (ngSubmit)="onCreateOpportunity()">
+            <label for="title">Título:</label>
+            <input type="text" [(ngModel)]="newOpportunity.title" name="title" required />
+
+            <label for="address">Endereço:</label>
+            <input type="text" [(ngModel)]="newOpportunity.address" name="address" required />
+
+            <label for="description">Descrição:</label>
+            <textarea [(ngModel)]="newOpportunity.description" name="description" required></textarea>
+
+            <label for="category">Categoria:</label>
+            <select [(ngModel)]="newOpportunity.categoryId" name="category" required>
+                <option *ngFor="let option of categoriesData" [value]="option.id">{{option.name}}</option>
+            </select>
+
+            <label for="municipality">Município:</label>
+            <select [(ngModel)]="newOpportunity.municipalityId" name="municipality" required>
+                <option *ngFor="let option of municipalitiesData" [value]="option.id">{{option.name}}</option>
+            </select>
+
+            <label for="startDate">Data de Início:</label>
+            <input type="date" [(ngModel)]="newOpportunity.startDate" name="startDate" required />
+
+            <label for="endDate">Data de Término:</label>
+            <input type="date" [(ngModel)]="newOpportunity.endDate" name="endDate" required />
+
+            <button type="submit">Criar</button>
+        </form>
+    </div>
 </div>
