@@ -21,7 +21,7 @@ export class OrganizationService {
   constructor(private http: HttpClient, private router: Router) { }
 
   getProfileInfo(): Observable<{data: any}> {
-    return this.http.get<{data: any}>(`${this.apiUrl}/organizations/me`);
+    return this.http.get<{data: any}>(`${this.apiUrl}/auth/me`);
   };
 
   getOrganizationInfo(): any {

@@ -22,7 +22,7 @@ export class VolunteerService {
   constructor(private http: HttpClient, private router: Router) { }
 
   getProfileInfo(): Observable<{data: any}> {
-    return this.http.get<{data: any}>(`${this.apiUrl}/volunteers/me`);
+    return this.http.get<{data: any}>(`${this.apiUrl}/auth/me`);
   }
 
   getVolunteerInfo(): any {

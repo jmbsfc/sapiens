@@ -29,7 +29,7 @@ export class OportunidadesComponent implements OnInit {
     categoryId: '',
     municipalityId: '',
     startDate: null,
-    endDate: null,
+    endDate: null
   };
   profileInfo: any = {};
   isOrgAccount = false;
@@ -46,28 +46,32 @@ export class OportunidadesComponent implements OnInit {
     this.volunteerService.getProfileInfo().subscribe(
       (response) => {
         this.profileInfo = response.data;
+
+        if (this.profileInfo.user.role === 'ORGANIZATION') {
+          this.isOrgAccount = true;
+        }
         this.oportunidadesService.getOportunities().subscribe((data) => {
           this.data = data.data;
         });
       },
-      (error) => {
-        console.log('Error', error);
-        this.organizationService.getProfileInfo().subscribe(
-          (response) => {
-            this.isOrgAccount = true;
-            this.profileInfo = response.data;
-            this.oportunidadesService.getOportunities().subscribe((data) => {
-              this.data = data.data;
-            });
-          },
-          (error) => {
-            console.log('Error', error);
-            this.oportunidadesService.getOportunities().subscribe((data) => {
-              this.data = data.data;
-            });
-          }
-        );
-      }
+      // (error) => {
+      //   console.log('Error', error);
+      //   this.organizationService.getProfileInfo().subscribe(
+      //     (response) => {
+      //       this.isOrgAccount = true;
+      //       this.profileInfo = response.data;
+      //       this.oportunidadesService.getOportunities().subscribe((data) => {
+      //         this.data = data.data;
+      //       });
+      //     },
+      //     (error) => {
+      //       console.log('Error', error);
+      //       this.oportunidadesService.getOportunities().subscribe((data) => {
+      //         this.data = data.data;
+      //       });
+      //     }
+      //   );
+      // }
     );
     
 
@@ -81,6 +85,7 @@ export class OportunidadesComponent implements OnInit {
       console.log(data.data);
     });
 
+    console.log('isOrgAccount:', this.isOrgAccount);
     
   }
 
