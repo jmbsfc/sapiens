@@ -17,6 +17,7 @@ import { DatePipe } from '@angular/common';
 })
 export class OportunidadesComponent implements OnInit {
   data: any;
+  originalData: any; // Store the original unfiltered data
   municipalitiesData: any = [];
   selectedMunicipality: any = '';
   categoriesData: any = [];
@@ -33,6 +34,7 @@ export class OportunidadesComponent implements OnInit {
   };
   profileInfo: any = {};
   isOrgAccount = false;
+  isLoading = false;
 
   constructor(
     private oportunidadesService: OportunidadesService,
@@ -50,9 +52,7 @@ export class OportunidadesComponent implements OnInit {
         if (this.profileInfo.user.role === 'ORGANIZATION') {
           this.isOrgAccount = true;
         }
-        this.oportunidadesService.getOportunities().subscribe((data) => {
-          this.data = data.data;
-        });
+        this.loadOpportunities();
       },
       // (error) => {
       //   console.log('Error', error);
@@ -74,19 +74,24 @@ export class OportunidadesComponent implements OnInit {
       // }
     );
     
-
     this.oportunidadesService.getMunicipalities().subscribe((data) => {
       this.municipalitiesData = data.data;
-      console.log(data.data);
+      console.log('Municipalities:', data.data);
     });
 
     this.oportunidadesService.getCategories().subscribe((data) => {
       this.categoriesData = data.data;
-      console.log(data.data);
+      console.log('Categories:', data.data);
     });
 
     console.log('isOrgAccount:', this.isOrgAccount);
-    
+  }
+
+  loadOpportunities() {
+    this.oportunidadesService.getOportunities().subscribe((data) => {
+      this.data = data.data;
+      this.originalData = [...data.data];
+    });
   }
 
   onMunicipalityChange(event: Event) {
@@ -96,6 +101,49 @@ export class OportunidadesComponent implements OnInit {
   onCategoryChange(event: Event) {
     this.selectedCategory = (event.target as HTMLSelectElement).value;
   }
+
+  applyFilters() {
+    this.isLoading = true;
+    
+    if (!this.selectedCategory && !this.selectedMunicipality) {
+      // If no filters are selected, show all opportunities
+      this.data = this.originalData;
+      this.isLoading = false;
+      return;
+    }
+    
+    this.oportunidadesService.getFilteredOpportunities(
+      this.selectedCategory, 
+      this.selectedMunicipality
+    ).subscribe(
+      (response) => {
+        this.data = response.data;
+        this.isLoading = false;
+      },
+      (error) => {
+        console.error('Error filtering opportunities:', error);
+        this.isLoading = false;
+        // Fallback to client-side filtering if API filtering fails
+        this.clientSideFiltering();
+      }
+    );
+  }
+
+  clientSideFiltering() {
+    let filteredData = [...this.originalData];
+    
+    if (this.selectedCategory) {
+      filteredData = filteredData.filter(item => item.category.id === this.selectedCategory);
+    }
+    
+    if (this.selectedMunicipality) {
+      filteredData = filteredData.filter(item => item.municipality.id === this.selectedMunicipality);
+    }
+    
+    this.data = filteredData;
+  }
+
+
 
   openModal() {
     this.isModalOpen = true;
@@ -113,6 +161,8 @@ export class OportunidadesComponent implements OnInit {
       (response) => {
         console.log('Opportunity created', response);
         this.closeModal();
+        // Reload opportunities after creating a new one
+        this.loadOpportunities();
       },
       (error) => {
         console.log('Error', error);

@@ -19,7 +19,47 @@
 <div class="modal" [class.show]="isModalOpen">
     <div class="modal-content">
         <span class="close" (click)="closeModal()">&times;</span>
-        <p>Modal content goes here...</p>
+        
+        <div class="modal-header">
+            <h2>{{cardData.title}}</h2>
+            <div class="modal-organization">
+                <p>Organização: <span>{{cardData.organization?.name}}</span></p>
+            </div>
+        </div>
+        
+        <div class="modal-body">
+            <div class="modal-image">
+                <img src="cardplaceholder.png" alt="{{cardData.title}}">
+            </div>
+            
+            <div class="modal-details">
+                <div class="detail-item">
+                    <h3>Descrição</h3>
+                    <p>{{cardData.description}}</p>
+                </div>
+                
+                <div class="detail-item">
+                    <h3>Localização</h3>
+                    <p><img src="marker.png" alt=""> {{cardData.address}}</p>
+                    <p>Município: {{cardData.municipality?.name}}</p>
+                </div>
+                
+                <div class="detail-item">
+                    <h3>Categoria</h3>
+                    <p>{{cardData.category?.name}}</p>
+                </div>
+                
+                <div class="detail-item">
+                    <h3>Período</h3>
+                    <p>De {{formattedStartDate || 'N/A'}} a {{formattedEndDate || 'N/A'}}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn-apply" *ngIf="!isOrgAccount" (click)="applyForOpportunity()">Candidatar-me</button>
+            <button class="btn-close" (click)="closeModal()">Fechar</button>
+        </div>
     </div>
 </div>
 

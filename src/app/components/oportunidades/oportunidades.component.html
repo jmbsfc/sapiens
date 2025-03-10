@@ -15,11 +15,17 @@
         </select>
     </div>
     <div class="apply-filter">
-        <a>
+        <a (click)="applyFilters()">
             Aplicar Filtros
         </a>
     </div>
 </div>
+
+<div *ngIf="isLoading" class="loading-indicator">
+    <div class="spinner"></div>
+    <p>A carregar oportunidades...</p>
+</div>
+
 <div class="container-cards">
     <!-- os ngFor, ngIf, ngClass etc são coisas do angular que simplificam a cena -->
     <app-card *ngFor="let card of data" [cardData]="card" [isOrgAccount]="isOrgAccount" [profileInfo]="profileInfo"></app-card>
@@ -29,34 +35,64 @@
 <div *ngIf="isModalOpen" class="modal">
     <div class="modal-content">
         <span class="close" (click)="closeModal()">&times;</span>
-        <h2>Criar Oportunidade</h2>
-        <form (ngSubmit)="onCreateOpportunity()">
-            <label for="title">Título:</label>
-            <input type="text" [(ngModel)]="newOpportunity.title" name="title" required />
+        
+        <div class="modal-header">
+            <h2>Criar Oportunidade</h2>
+            <p class="modal-subtitle">Preencha os detalhes da nova oportunidade de voluntariado</p>
+        </div>
+        
+        <div class="modal-body">
+            <form (ngSubmit)="onCreateOpportunity()" class="create-form">
+                <div class="form-group">
+                    <label for="title">Título</label>
+                    <input type="text" [(ngModel)]="newOpportunity.title" name="title" placeholder="Ex: Voluntariado para Limpeza de Praia" required />
+                </div>
 
-            <label for="address">Endereço:</label>
-            <input type="text" [(ngModel)]="newOpportunity.address" name="address" required />
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="category">Categoria</label>
+                        <select [(ngModel)]="newOpportunity.categoryId" name="category" required>
+                            <option value="" disabled selected>Selecione uma categoria</option>
+                            <option *ngFor="let option of categoriesData" [value]="option.id">{{option.name}}</option>
+                        </select>
+                    </div>
 
-            <label for="description">Descrição:</label>
-            <textarea [(ngModel)]="newOpportunity.description" name="description" required></textarea>
+                    <div class="form-group">
+                        <label for="municipality">Município</label>
+                        <select [(ngModel)]="newOpportunity.municipalityId" name="municipality" required>
+                            <option value="" disabled selected>Selecione um município</option>
+                            <option *ngFor="let option of municipalitiesData" [value]="option.id">{{option.name}}</option>
+                        </select>
+                    </div>
+                </div>
 
-            <label for="category">Categoria:</label>
-            <select [(ngModel)]="newOpportunity.categoryId" name="category" required>
-                <option *ngFor="let option of categoriesData" [value]="option.id">{{option.name}}</option>
-            </select>
+                <div class="form-group">
+                    <label for="address">Endereço</label>
+                    <input type="text" [(ngModel)]="newOpportunity.address" name="address" placeholder="Ex: Av. da República, 32, Lisboa" required />
+                </div>
 
-            <label for="municipality">Município:</label>
-            <select [(ngModel)]="newOpportunity.municipalityId" name="municipality" required>
-                <option *ngFor="let option of municipalitiesData" [value]="option.id">{{option.name}}</option>
-            </select>
+                <div class="form-group">
+                    <label for="description">Descrição</label>
+                    <textarea [(ngModel)]="newOpportunity.description" name="description" placeholder="Descreva detalhadamente a oportunidade de voluntariado..." rows="5" required></textarea>
+                </div>
 
-            <label for="startDate">Data de Início:</label>
-            <input type="date" [(ngModel)]="newOpportunity.startDate" name="startDate" required />
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="startDate">Data de Início</label>
+                        <input type="date" [(ngModel)]="newOpportunity.startDate" name="startDate" required />
+                    </div>
 
-            <label for="endDate">Data de Término:</label>
-            <input type="date" [(ngModel)]="newOpportunity.endDate" name="endDate" required />
+                    <div class="form-group">
+                        <label for="endDate">Data de Término</label>
+                        <input type="date" [(ngModel)]="newOpportunity.endDate" name="endDate" required />
+                    </div>
+                </div>
 
-            <button type="submit">Criar</button>
-        </form>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn-create">Criar Oportunidade</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>

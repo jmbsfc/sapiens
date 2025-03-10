@@ -17,8 +17,22 @@ export class OportunidadesService {
 
   public getOportunities(): Observable<any> {
       return this.http.get<{data: any}>(`${this.apiUrl}/offers`);
-
   }
+
+  public getFilteredOpportunities(categoryId?: string, municipalityId?: string): Observable<any> {
+    let url = `${this.apiUrl}/offers?`;
+    
+    if (categoryId) {
+      url += `categoryId=${categoryId}`;
+    }
+    
+    if (municipalityId) {
+      url += categoryId ? `&municipalityId=${municipalityId}` : `municipalityId=${municipalityId}`;
+    }
+    
+    return this.http.get<{data: any}>(url);
+  }
+
   public getMunicipalities(): Observable<{data:any}> {
     return this.http.get<{data: any}>(`${this.apiUrl}/municipalities`);
   }
