@@ -1,88 +1,196 @@
+/* Main container styling with subtle background pattern */
+:host {
+    display: block;
+    background-color: #f9f9f9;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23007979' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    min-height: 100vh;
+    padding-bottom: 60px;
+}
+
 .container-cards {
     display: flex;
     flex-wrap: wrap;
-    margin-left: 10%;
-    margin-right: 10%;
+    margin: 0 auto;
+    max-width: 1200px;
     justify-content: center;  
-    gap: 40px;
-    padding: 64px;
+    gap: 30px;
+    padding: 40px 20px;
+    position: relative;
 }
 
+/* Enhanced filter section */
 .dropdown-container {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    margin-top: 84px;
-    margin-bottom: 84px;
+    gap: 15px;
+    margin: 40px auto;
+    max-width: 1000px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    position: relative;
+    z-index: 10;
 }
 
 .dropdown {
-    padding: 10px;
-    cursor: pointer;
-
-    &:hover {
-        cursor: pointer;
-    }
+    position: relative;
+    min-width: 200px;
 }
 
-.dropdown-select{
+.dropdown::after {
+    content: '▼';
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #007979;
+    font-size: 12px;
+    pointer-events: none;
+}
+
+.dropdown-select {
+    width: 100%;
     background-color: #fff;
-    padding: 20px;
-    border-radius: 100px; 
-    transition: background-color 0.3s ease, transform 0.3s ease; 
+    padding: 15px 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px; 
+    transition: all 0.3s ease;
     appearance: none; /* Remove default arrow */
-    
-    &:hover {
-        cursor: pointer;
-        background-color: #f0f0f0;
-        transform: scale(1.05); 
-    }
+    font-size: 14px;
+    color: #333;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.dropdown-select:hover, 
+.dropdown-select:focus {
+    cursor: pointer;
+    border-color: #007979;
+    box-shadow: 0 3px 8px rgba(0, 121, 121, 0.15);
+    outline: none;
 }
 
 .dropdown-option {
     padding: 10px;
     background-color: #fff;
-    border: 1px solid #808080;
-    border-radius: 84px;
     cursor: pointer;
 }
 
+/* Button styling with improved icon spacing */
 .create-opportunity a,
 .apply-filter a {
-    border: 0px;
-    margin-right: 10px;
-    margin-left: 10px;
-    border-radius: 100px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border-radius: 10px;
     font-size: 14px;
-    padding: 20px;
-    border: 1px solid #007979;
+    font-weight: 500;
     background-color: #007979;
     color: #ffffff;
-    font-weight: normal;
-    transition: 1s;
+    border: 2px solid #007979;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 121, 121, 0.2);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+/* Add spacing between icon and text */
+.create-opportunity a i,
+.apply-filter a i {
+    margin-right: 8px;
+    font-size: 1.1rem;
+}
+
+.create-opportunity a:hover,
+.apply-filter a:hover {
+    cursor: pointer; 
+    background-color: #006666;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 121, 121, 0.25);
+}
+
+.apply-filter a {
     display: flex;
     align-items: center;
-    justify-content: center; /* Center the text and icon */
-   
-    &:hover {
-        cursor: pointer; 
-        background-color: #F9F9F9;
-        border: 1px solid #808080;
-        opacity: 1;
-        transition: 0.4s;
-        color: #000000;
-    }
 }
 
-.create-opportunity img{
-    size: 20;
+.apply-filter a:last-child {
+    background-color: transparent;
+    color: #007979;
+    border: 2px solid #007979;
 }
 
-.apply-filter {
+.apply-filter a:last-child:hover {
+    background-color: rgba(0, 121, 121, 0.1);
+}
+
+/* Enhanced loading indicator */
+.loading-indicator {
     display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    width: 100%;
+    text-align: center;
 }
 
-/* Enhanced Modal Styles */
+.loading-indicator p {
+    margin-top: 20px;
+    color: #007979;
+    font-weight: 500;
+    font-size: 16px;
+    animation: pulse 1.5s infinite;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(0, 121, 121, 0.2);
+    border-radius: 50%;
+    border-top-color: #007979;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+/* No results message */
+.no-results {
+    text-align: center;
+    padding: 40px 20px;
+    width: 100%;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    margin: 20px 0;
+}
+
+.no-results p {
+    color: #666;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.no-results img {
+    width: 120px;
+    height: auto;
+    margin-bottom: 20px;
+    opacity: 0.7;
+}
+
+/* Keep the existing modal styles */
 .modal {
     display: flex;
     justify-content: center;
@@ -276,53 +384,75 @@
     box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 
-/* Loading Indicator */
-.loading-indicator {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin: 30px 0;
-}
-
-.spinner {
-    border: 4px solid rgba(0, 0, 0, 0.1);
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border-left-color: #007979;
-    animation: spin 1s linear infinite;
-    margin-bottom: 10px;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-/* Responsive Styles */
+/* Responsive adjustments */
 @media (max-width: 768px) {
-    .form-row {
-        flex-direction: column;
-        gap: 20px;
-    }
-    
-    .form-row .form-group {
-        width: 100%;
-    }
-    
     .dropdown-container {
         flex-direction: column;
-        gap: 15px;
+        padding: 15px;
+    }
+    
+    .dropdown {
+        width: 100%;
     }
     
     .create-opportunity a,
     .apply-filter a {
         width: 100%;
+        justify-content: center;
     }
+    
+    .apply-filter {
+        width: 100%;
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+/* Page header styling */
+.page-header {
+    text-align: center;
+    padding: 60px 20px 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.page-header h1 {
+    color: #007979;
+    font-size: 32px;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.page-header p {
+    color: #666;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* Button for "Ver todas as oportunidades" */
+.btn-reset {
+    background-color: #007979;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-reset i {
+    margin-right: 8px;
+    font-size: 1.1rem;
+}
+
+.btn-reset:hover {
+    background-color: #006666;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 

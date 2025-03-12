@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../services/auth.service';
@@ -7,7 +7,8 @@ import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, MatToolbarModule, MatButtonModule, NgIf],
+  standalone: true,
+  imports: [RouterLink, RouterLinkActive, MatToolbarModule, MatButtonModule, NgIf],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })

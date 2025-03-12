@@ -54,24 +54,6 @@ export class OportunidadesComponent implements OnInit {
         }
         this.loadOpportunities();
       },
-      // (error) => {
-      //   console.log('Error', error);
-      //   this.organizationService.getProfileInfo().subscribe(
-      //     (response) => {
-      //       this.isOrgAccount = true;
-      //       this.profileInfo = response.data;
-      //       this.oportunidadesService.getOportunities().subscribe((data) => {
-      //         this.data = data.data;
-      //       });
-      //     },
-      //     (error) => {
-      //       console.log('Error', error);
-      //       this.oportunidadesService.getOportunities().subscribe((data) => {
-      //         this.data = data.data;
-      //       });
-      //     }
-      //   );
-      // }
     );
     
     this.oportunidadesService.getMunicipalities().subscribe((data) => {
@@ -88,36 +70,57 @@ export class OportunidadesComponent implements OnInit {
   }
 
   loadOpportunities() {
-    this.oportunidadesService.getOportunities().subscribe((data) => {
-      this.data = data.data;
-      this.originalData = [...data.data];
-    });
-  }
-
-  onMunicipalityChange(event: Event) {
-    this.selectedMunicipality = (event.target as HTMLSelectElement).value;
-  }
-
-  onCategoryChange(event: Event) {
-    this.selectedCategory = (event.target as HTMLSelectElement).value;
+    this.isLoading = true;
+    // Reset filter values
+    this.selectedCategory = '';
+    this.selectedMunicipality = '';
+    
+    this.oportunidadesService.getOportunities().subscribe(
+      (data) => {
+        console.log('Loaded opportunities:', data);
+        this.data = data.data;
+        this.originalData = [...data.data];
+        this.isLoading = false;
+      },
+      (error) => {
+        console.error('Error loading opportunities:', error);
+        this.isLoading = false;
+      }
+    );
   }
 
   applyFilters() {
+    console.log('Applying filters - Category:', this.selectedCategory, 'Municipality:', this.selectedMunicipality);
     this.isLoading = true;
     
-    if (!this.selectedCategory && !this.selectedMunicipality) {
-      // If no filters are selected, show all opportunities
-      this.data = this.originalData;
+    // Reset data to original if both filters are empty strings or null/undefined
+    if ((!this.selectedCategory || this.selectedCategory === '') && 
+        (!this.selectedMunicipality || this.selectedMunicipality === '')) {
+      console.log('No filters selected, showing all opportunities');
+      this.data = [...this.originalData];
       this.isLoading = false;
       return;
     }
     
+    console.log('Calling getFilteredOpportunities with:', 
+      this.selectedCategory || 'undefined', 
+      this.selectedMunicipality || 'undefined'
+    );
+    
+    // Call the service with the selected filters
     this.oportunidadesService.getFilteredOpportunities(
-      this.selectedCategory, 
-      this.selectedMunicipality
+      this.selectedCategory || undefined, 
+      this.selectedMunicipality || undefined
     ).subscribe(
       (response) => {
-        this.data = response.data;
+        console.log('API Response:', response);
+        if (response && response.data) {
+          console.log('Filtered opportunities data:', response.data);
+          this.data = response.data;
+        } else {
+          console.warn('Response or response.data is undefined, using empty array');
+          this.data = [];
+        }
         this.isLoading = false;
       },
       (error) => {
@@ -130,20 +133,22 @@ export class OportunidadesComponent implements OnInit {
   }
 
   clientSideFiltering() {
+    console.log('Falling back to client-side filtering');
     let filteredData = [...this.originalData];
     
-    if (this.selectedCategory) {
-      filteredData = filteredData.filter(item => item.category.id === this.selectedCategory);
+    if (this.selectedCategory && this.selectedCategory !== '') {
+      console.log('Filtering by category:', this.selectedCategory);
+      filteredData = filteredData.filter(item => item.category && item.category.id === this.selectedCategory);
     }
     
-    if (this.selectedMunicipality) {
-      filteredData = filteredData.filter(item => item.municipality.id === this.selectedMunicipality);
+    if (this.selectedMunicipality && this.selectedMunicipality !== '') {
+      console.log('Filtering by municipality:', this.selectedMunicipality);
+      filteredData = filteredData.filter(item => item.municipality && item.municipality.id === this.selectedMunicipality);
     }
     
+    console.log('Client-side filtered data:', filteredData);
     this.data = filteredData;
   }
-
-
 
   openModal() {
     this.isModalOpen = true;

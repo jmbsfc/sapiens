@@ -15,7 +15,6 @@
     width: 85%;
     height: 80px;
     z-index: 1000;
-
 }
 
 .container-navbar-logo{
@@ -33,24 +32,104 @@
     height: 100%;
     width:60%;
     margin-bottom: 14px;
+    transition: transform 0.3s ease;
     
     &:hover{
         cursor:pointer;
+        transform: scale(1.05);
     }
+}
+
+.container-navbar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
 .container-navbar span{
     color: var(--light-color);
+    display: inline-block;
+    margin-left: 25px;
+    position: relative;
 }
 
 .container-navbar-item a{
     color: var(--light-color);
     text-decoration: none;
     font-size: 16px;
-    margin-left: 12px;
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
-.container-navbar-item :hover{
+/* Add spacing between icon and text in navbar links */
+.container-navbar-item a i {
+    margin-right: 8px;
+    transition: transform 0.3s ease;
+}
+
+/* Hover effect for navbar items */
+.container-navbar-item a:hover {
     cursor: pointer;
-    text-decoration: underline;
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Icon animation on hover */
+.container-navbar-item a:hover i {
+    transform: scale(1.2);
+}
+
+/* Active link style */
+.container-navbar-item a.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Animated underline effect */
+.container-navbar-item a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background-color: #fff;
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.container-navbar-item a:hover::after {
+    width: 80%;
+}
+
+/* Special animation for logout button */
+.container-navbar-item a[ng-reflect-click] {
+    transition: all 0.3s ease;
+}
+
+.container-navbar-item a[ng-reflect-click]:hover {
+    background-color: rgba(255, 0, 0, 0.15);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .mat-toolbar {
+        padding: 0 20px;
+        width: 95%;
+    }
+    
+    .container-navbar span {
+        margin-left: 10px;
+    }
+    
+    .container-navbar-item a {
+        font-size: 14px;
+        padding: 6px 8px;
+    }
 }

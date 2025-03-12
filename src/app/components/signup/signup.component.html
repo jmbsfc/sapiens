@@ -1,40 +1,62 @@
 <div class="login-page-container">
-    <div class="login-container">
-        <h1>Criar Conta de Voluntário</h1>
-        <form (ngSubmit)="onSubmit()">
-            <div *ngIf="step === 1">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" placeholder="Coloque o seu email" [(ngModel)]="formData.email" required>
+    <div class="form-container">
+        <div class="login-container">
+            <h1>Criar Conta de Voluntário</h1>
+            
+            <form (ngSubmit)="onSubmit()">
+                <div *ngIf="step === 1">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" placeholder="Coloque o seu email" [(ngModel)]="formData.email" required [ngClass]="{'input-error': formErrors.email}">
+                    <div class="field-error" *ngIf="formErrors.email">{{ formErrors.email }}</div>
 
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" placeholder="Crie uma password" [(ngModel)]="formData.password" required>
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" placeholder="Crie uma password" [(ngModel)]="formData.password" required [ngClass]="{'input-error': formErrors.password}">
+                    <div class="field-error" *ngIf="formErrors.password">{{ formErrors.password }}</div>
 
-                <label for="profilePicture">Foto de Perfil:</label>
-                <input type="file" id="profilePicture" name="profilePicture" (change)="onFileChange($event)" accept="image/*">
+                    <label for="profilePicture">Foto de Perfil:</label>
+                    <input type="file" id="profilePicture" name="profilePicture" (change)="onFileChange($event)" accept="image/*">
 
-                <button type="button" (click)="nextStep()">Próximo</button>
+                    <button type="button" (click)="nextStep()">Próximo</button>
+                </div>
+
+                <div *ngIf="step === 2">
+                    <label for="firstname">Nome:</label>
+                    <input type="text" id="firstname" name="firstname" placeholder="Coloque o seu nome próprio" [(ngModel)]="formData.firstname" required [ngClass]="{'input-error': formErrors.firstname}">
+                    <div class="field-error" *ngIf="formErrors.firstname">{{ formErrors.firstname }}</div>
+
+                    <label for="lastname">Sobrenome:</label>
+                    <input type="text" id="lastname" name="lastname" placeholder="Coloque o seu sobrenome" [(ngModel)]="formData.lastname" required [ngClass]="{'input-error': formErrors.lastname}">
+                    <div class="field-error" *ngIf="formErrors.lastname">{{ formErrors.lastname }}</div>
+
+                    <label for="phone">Telefone:</label>
+                    <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Ex: 910000000" [(ngModel)]="formData.phoneNumber" required [ngClass]="{'input-error': formErrors.phoneNumber}">
+                    <div class="field-error" *ngIf="formErrors.phoneNumber">{{ formErrors.phoneNumber }}</div>
+
+                    <label for="civilId">ID Civil:</label>
+                    <input type="text" id="civilId" name="civilId" placeholder="Ex: 000000000" [(ngModel)]="formData.civilId" required [ngClass]="{'input-error': formErrors.civilId}">
+                    <div class="field-error" *ngIf="formErrors.civilId">{{ formErrors.civilId }}</div>
+
+                    <label for="birthdate">Data de Nascimento:</label>
+                    <input type="date" id="birthdate" name="birthdate" [(ngModel)]="formData.birthdate" required [ngClass]="{'input-error': formErrors.birthdate}">
+                    <div class="field-error" *ngIf="formErrors.birthdate">{{ formErrors.birthdate }}</div>
+
+                    <button type="button" (click)="prevStep()">Voltar</button>
+                    <button type="submit" [disabled]="isSubmitting">
+                        <span *ngIf="!isSubmitting">Criar Conta</span>
+                        <span *ngIf="isSubmitting">Processando...</span>
+                    </button>
+                </div>
+                
+                <p>Já tem uma conta? <a href="/login">Login</a></p>
+            </form>
+        </div>
+        
+        <!-- Error message container (positioned absolutely) -->
+        <div class="error-message-container" [ngClass]="{'visible': errorMessage}">
+            <div class="error-message" *ngIf="errorMessage">
+                <div class="error-message-title">Atenção</div>
+                <p>{{ errorMessage }}</p>
             </div>
-
-            <div *ngIf="step === 2">
-                <label for="firstname">Nome:</label>
-                <input type="text" id="firstname" name="firstname" placeholder="Coloque o seu nome próprio" [(ngModel)]="formData.firstname" required>
-
-                <label for="lastname">Sobrenome:</label>
-                <input type="text" id="lastname" name="lastname" placeholder="Coloque o seu sobrenome" [(ngModel)]="formData.lastname" required>
-
-                <label for="phone">Telefone:</label>
-                <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Ex: 910000000" [(ngModel)]="formData.phoneNumber" required>
-
-                <label for="civilId">ID Civil:</label>
-                <input type="text" id="civilId" name="civilId" placeholder="Ex: 000000000" [(ngModel)]="formData.civilId" required>
-
-                <label for="birthdate">Data de Nascimento:</label>
-                <input type="date" id="birthdate" name="birthdate" [(ngModel)]="formData.birthdate" required>
-
-                <button type="button" (click)="prevStep()">Voltar</button>
-                <button type="submit">Criar Conta</button>
-            </div>
-        </form>
-        <p>Já tem uma conta? <a href="/login">Login</a></p>
+        </div>
     </div>
 </div>

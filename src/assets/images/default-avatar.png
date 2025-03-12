@@ -1,0 +1,9 @@
+This is a placeholder file.
+
+To generate the actual default-avatar.png:
+1. Open the generate-default-avatar.html file in a web browser
+2. Click the "Generate PNG" button
+3. Click the "Download PNG" button
+4. Save the downloaded PNG file to this location (src/assets/images/default-avatar.png)
+
+The PNG version is needed for browsers that don't support SVG or for better compatibility. 

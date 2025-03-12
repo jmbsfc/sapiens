@@ -34,27 +34,79 @@ export class CardComponent implements OnInit {
     try {
       // Check if dates exist and try to format them
       if (this.cardData && this.cardData.startDate) {
-        // Try to parse the date string if it's not already a Date object
-        const startDate = typeof this.cardData.startDate === 'string' 
-          ? new Date(this.cardData.startDate.replace(/-/g, '/')) 
-          : this.cardData.startDate;
+        // Try to parse the date string using multiple approaches
+        let startDate: Date | null = null;
+        
+        if (typeof this.cardData.startDate === 'string') {
+          // Try different date parsing approaches
+          // First try direct parsing
+          startDate = new Date(this.cardData.startDate);
           
-        this.formattedStartDate = this.datePipe.transform(startDate, 'dd/MM/yyyy') || this.cardData.startDate;
+          // If invalid, try replacing hyphens with slashes
+          if (isNaN(startDate.getTime())) {
+            startDate = new Date(this.cardData.startDate.replace(/-/g, '/'));
+          }
+          
+          // If still invalid, try parsing DD-MM-YYYY format
+          if (isNaN(startDate.getTime()) && this.cardData.startDate.includes('-')) {
+            const parts = this.cardData.startDate.split('-');
+            if (parts.length === 3) {
+              // Assuming DD-MM-YYYY format
+              startDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+            }
+          }
+        } else {
+          startDate = this.cardData.startDate;
+        }
+        
+        // Only format if we have a valid date
+        if (startDate && !isNaN(startDate.getTime())) {
+          this.formattedStartDate = this.datePipe.transform(startDate, 'dd/MM/yyyy') || '';
+        } else {
+          console.warn('Invalid start date:', this.cardData.startDate);
+          this.formattedStartDate = 'Data não disponível';
+        }
       }
       
       if (this.cardData && this.cardData.endDate) {
-        // Try to parse the date string if it's not already a Date object
-        const endDate = typeof this.cardData.endDate === 'string' 
-          ? new Date(this.cardData.endDate.replace(/-/g, '/')) 
-          : this.cardData.endDate;
+        // Try to parse the date string using multiple approaches
+        let endDate: Date | null = null;
+        
+        if (typeof this.cardData.endDate === 'string') {
+          // Try different date parsing approaches
+          // First try direct parsing
+          endDate = new Date(this.cardData.endDate);
           
-        this.formattedEndDate = this.datePipe.transform(endDate, 'dd/MM/yyyy') || this.cardData.endDate;
+          // If invalid, try replacing hyphens with slashes
+          if (isNaN(endDate.getTime())) {
+            endDate = new Date(this.cardData.endDate.replace(/-/g, '/'));
+          }
+          
+          // If still invalid, try parsing DD-MM-YYYY format
+          if (isNaN(endDate.getTime()) && this.cardData.endDate.includes('-')) {
+            const parts = this.cardData.endDate.split('-');
+            if (parts.length === 3) {
+              // Assuming DD-MM-YYYY format
+              endDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+            }
+          }
+        } else {
+          endDate = this.cardData.endDate;
+        }
+        
+        // Only format if we have a valid date
+        if (endDate && !isNaN(endDate.getTime())) {
+          this.formattedEndDate = this.datePipe.transform(endDate, 'dd/MM/yyyy') || '';
+        } else {
+          console.warn('Invalid end date:', this.cardData.endDate);
+          this.formattedEndDate = 'Data não disponível';
+        }
       }
     } catch (error) {
       console.error('Error formatting dates:', error);
-      // Fallback to original values if formatting fails
-      this.formattedStartDate = this.cardData.startDate;
-      this.formattedEndDate = this.cardData.endDate;
+      // Fallback to default values if formatting fails
+      this.formattedStartDate = 'Data não disponível';
+      this.formattedEndDate = 'Data não disponível';
     }
     
     console.log('Formatted dates:', this.formattedStartDate, this.formattedEndDate);

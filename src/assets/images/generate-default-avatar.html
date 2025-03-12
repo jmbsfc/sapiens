@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Default Avatar PNG</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .preview {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #64cbfd;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #4ba8d8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Generate Default Avatar PNG</h1>
+        <p>This tool converts the default avatar SVG to PNG format.</p>
+        
+        <div class="preview">
+            <div>
+                <h3>SVG Version</h3>
+                <svg id="avatarSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+                    <!-- Background circle -->
+                    <circle cx="100" cy="100" r="100" fill="#64cbfd" />
+                    
+                    <!-- Person silhouette -->
+                    <path d="M100,50 
+                             a30,30 0 1,0 0,60
+                             a30,30 0 1,0 0,-60" 
+                          fill="#ffffff" />
+                    
+                    <!-- Body shape -->
+                    <path d="M60,120 
+                             Q100,180 140,120" 
+                          fill="#ffffff" 
+                          stroke="#ffffff" 
+                          stroke-width="5" />
+                </svg>
+            </div>
+            
+            <div>
+                <h3>PNG Version</h3>
+                <img id="avatarPng" alt="Default Avatar PNG" width="200" height="200">
+            </div>
+        </div>
+        
+        <button id="generateBtn">Generate PNG</button>
+        <button id="downloadBtn" style="display: none;">Download PNG</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const svgElem = document.getElementById('avatarSvg');
+            const pngImg = document.getElementById('avatarPng');
+            const generateBtn = document.getElementById('generateBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            
+            // Function to convert SVG to PNG
+            function convertSvgToPng() {
+                // Get the SVG as a string
+                const svgData = new XMLSerializer().serializeToString(svgElem);
+                
+                // Create a Blob from the SVG string
+                const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+                
+                // Create a URL from the Blob
+                const svgUrl = URL.createObjectURL(svgBlob);
+                
+                // Create an Image object
+                const img = new Image();
+                
+                // When the image loads, draw it on a canvas and convert to PNG
+                img.onload = function() {
+                    // Create a canvas
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 200;
+                    canvas.height = 200;
+                    
+                    // Draw the image on the canvas
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, 200, 200);
+                    
+                    // Convert the canvas to a PNG data URL
+                    const pngUrl = canvas.toDataURL('image/png');
+                    
+                    // Set the PNG image source
+                    pngImg.src = pngUrl;
+                    
+                    // Show the download button
+                    downloadBtn.style.display = 'inline-block';
+                    
+                    // Set up the download button
+                    downloadBtn.onclick = function() {
+                        const a = document.createElement('a');
+                        a.href = pngUrl;
+                        a.download = 'default-avatar.png';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    };
+                    
+                    // Clean up
+                    URL.revokeObjectURL(svgUrl);
+                };
+                
+                // Set the image source to the SVG URL
+                img.src = svgUrl;
+            }
+            
+            // Generate PNG when the button is clicked
+            generateBtn.addEventListener('click', convertSvgToPng);
+            
+            // Generate PNG on page load
+            convertSvgToPng();
+        });
+    </script>
+</body>
+</html> 
