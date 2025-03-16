@@ -6,6 +6,9 @@
         <span class="container-navbar-item">
             <a routerLink="/oportunidades" routerLinkActive="active"><i class="fas fa-hands-helping"></i> Oportunidades</a>
         </span>
+        <span class="container-navbar-item" *ngIf="isLoggedIn && isOrgAccount">
+            <a routerLink="/candidaturas" routerLinkActive="active"><i class="fas fa-users"></i> Candidaturas</a>
+        </span>
         <span class="container-navbar-item">
             <a routerLink="/perfil" routerLinkActive="active"><i class="fas fa-user-circle"></i> {{ isLoggedIn ? 'Perfil' : 'Criar Conta' }}</a>
         </span>

@@ -14,12 +14,21 @@ import { NgIf } from '@angular/common';
 })
 export class NavbarComponent implements OnInit {
   isLoggedIn: boolean = false;
+  isOrgAccount: boolean = false;
 
   constructor(private authService: AuthService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.authService.isAuthenticated$.subscribe(isAuthenticated => {
       this.isLoggedIn = isAuthenticated;
+      
+      // Check if the user is an organization
+      if (this.isLoggedIn) {
+        this.isOrgAccount = this.authService.isOrgAccount();
+      } else {
+        this.isOrgAccount = false;
+      }
+      
       this.cdr.detectChanges(); // Trigger change detection
     });
   }

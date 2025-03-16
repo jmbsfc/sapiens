@@ -16,8 +16,8 @@
         <div class="profile-header">
             <div class="profile-picture">
                 <img [src]="profileImageUrl" alt="Profile Picture" (error)="handleImageError()" crossorigin="anonymous">
-            </div>
-            <div class="profile-info">
+    </div>
+    <div class="profile-info">
                 <!-- Volunteer profile info -->
                 <div *ngIf="!isOrgAccount">
                     <h1 class="profile-title">
@@ -119,37 +119,37 @@
             <pre>{{ profileInfo | json }}</pre>
         </div>
 
-        <!-- Volunteer History Section -->
+        <!-- Volunteer Applications Section -->
         <div class="profile-section" *ngIf="!isOrgAccount">
             <h2 class="section-title">
-                <i class="fas fa-history"></i> Volunteer History
+                <i class="fas fa-clipboard-list"></i> Minhas Candidaturas
             </h2>
             
-            <div class="volunteer-history" *ngIf="volunteerHistory.length > 0">
-                <div class="history-item" *ngFor="let item of volunteerHistory" [ngClass]="{'expanded': item.expanded}">
-                    <div class="history-image">
-                        <img src="assets/images/opportunity-default.jpg" alt="{{ item.title }}">
-                    </div>
-                    <div class="history-content">
-                        <h3 class="history-title">{{ item.title }}</h3>
-                        <p class="history-description" [ngClass]="{'expanded': item.expanded}">
-                            {{ item.description }}
-                        </p>
-                        <div class="history-details">
-                            <p><strong>Organization:</strong> {{ item.organization }}</p>
-                            <p><strong>Date:</strong> {{ formatDate(item.date) }}</p>
-                            <p><strong>Location:</strong> {{ item.address }}</p>
+            <div class="volunteer-applications" *ngIf="volunteerApplications.length > 0">
+                <div class="application-item" *ngFor="let application of volunteerApplications">
+                    <div class="application-content">
+                        <h3 class="application-title">{{ application.offer.title }}</h3>
+                        <div class="application-status" [ngClass]="application.status ? application.status.toLowerCase() : 'pending'">
+                            {{ application.status || 'Pendente' }}
                         </div>
-                    </div>
-                    <div class="history-expand" (click)="toggleHistoryItem(item)">
-                        <i class="fas" [ngClass]="item.expanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                        <div class="application-details">
+                            <p><strong>Organização:</strong> {{ application.offer.organization?.name }}</p>
+                            <p><strong>Data:</strong> {{ formatDate(application.offer.startDate) }} - {{ formatDate(application.offer.endDate) }}</p>
+                            <p><strong>Local:</strong> {{ application.offer.address }}</p>
+                        </div>
+                        <div class="application-actions">
+                            <a [routerLink]="['/oportunidades', application.offer.id]" class="application-action-btn">
+                                <i class="fas fa-eye"></i> Ver Oportunidade
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
             
-            <div class="no-results" *ngIf="volunteerHistory.length === 0">
-                <h3>Histórico de Voluntariado Vazio</h3>
-                <p>Ainda não participaste numa oportunidade. Começa agora a explorar as oportunidades disponíveis!</p>
+            <div class="no-results" *ngIf="volunteerApplications.length === 0">
+                <h3>Sem Candidaturas</h3>
+                <p>Ainda não te candidataste a nenhuma oportunidade. Explora as oportunidades disponíveis e candidata-te!</p>
+                <a routerLink="/oportunidades" class="explore-btn">Explorar Oportunidades</a>
             </div>
         </div>
 
@@ -161,24 +161,28 @@
             
             <div class="volunteer-history" *ngIf="orgOpportunities.length > 0">
                 <div class="history-item" *ngFor="let item of orgOpportunities" [ngClass]="{'expanded': item.expanded}">
-                    <div class="history-image">
-                        <img src="assets/images/opportunity-default.jpg" alt="{{ item.title }}">
-                    </div>
                     <div class="history-content">
-                        <h3 class="history-title">{{ item.title }}</h3>
+                        <div class="history-header">
+                            <h3 class="history-title">{{ item.title }}</h3>
+                            <div class="history-expand" (click)="toggleHistoryItem(item)">
+                                <i class="fas" [ngClass]="item.expanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                            </div>
+                        </div>
                         <p class="history-description" [ngClass]="{'expanded': item.expanded}">
                             {{ item.description }}
                         </p>
-                        <div class="history-details">
+                        <div class="history-details" *ngIf="item.expanded">
                             <p><strong>Category:</strong> {{ item.category }}</p>
                             <p><strong>Location:</strong> {{ item.municipality }}</p>
                             <p><strong>Address:</strong> {{ item.address }}</p>
                             <p><strong>Date:</strong> {{ formatDate(item.startDate) }} - {{ formatDate(item.endDate) }}</p>
                             <p><strong>Participants:</strong> {{ item.participantsCount }}</p>
                         </div>
-                    </div>
-                    <div class="history-expand" (click)="toggleHistoryItem(item)">
-                        <i class="fas" [ngClass]="item.expanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                        <div class="history-actions" *ngIf="item.expanded">
+                            <a [routerLink]="['/oportunidades', item.id, 'candidaturas']" class="action-btn view-applications">
+                                <i class="fas fa-users"></i> Ver candidaturas
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

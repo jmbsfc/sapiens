@@ -7,12 +7,15 @@ import { LandingpageComponent } from './components/landingpage/landingpage.compo
 import { SignupComponent } from './components/signup/signup.component';
 import { OrgsignupComponent } from './components/orgsignup/orgsignup.component';
 import { AcctypepickerComponent } from './components/acctypepicker/acctypepicker.component';
+import { ApplicationsComponent } from './components/applications/applications.component';
 
 
 export const routes: Routes = [
     {path:'', component:LandingpageComponent},
     {path:'perfil', component: PerfilComponent, canActivate: [authGuard]}, 
     {path:'oportunidades', component: OportunidadesComponent, canActivate: [authGuard]},
+    {path:'oportunidades/:id/candidaturas', component: ApplicationsComponent, canActivate: [authGuard]},
+    {path:'candidaturas', component: ApplicationsComponent, canActivate: [authGuard]},
     {path:'login', component: LoginComponent},
     {path:'signup',component: SignupComponent},
     {path:"orgsignup", component: OrgsignupComponent},

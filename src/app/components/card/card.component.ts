@@ -1,9 +1,12 @@
 import { NgIf } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { ApplicationService } from '../../services/application.service';
+import { VolunteerService } from '../../services/volunteer.service';
 
 @Component({
   selector: 'app-card',
+  standalone: true,
   imports: [NgIf, DatePipe],
   templateUrl: './card.component.html',
   styleUrls: ['./card.component.css'],
@@ -17,17 +20,30 @@ export class CardComponent implements OnInit {
   isMine = false;
   formattedStartDate: string = '';
   formattedEndDate: string = '';
+  
+  // Application related properties
+  applications: any[] = [];
+  hasApplied: boolean = false;
+  isApplying: boolean = false;
+  applicationError: string | null = null;
 
-  constructor(private datePipe: DatePipe) {}
+  constructor(
+    private datePipe: DatePipe,
+    private applicationService: ApplicationService,
+    private volunteerService: VolunteerService
+  ) {}
 
   ngOnInit() {
-    console.log('HERE--------------------------',this.isOrgAccount, this.cardData.organization.id)
+    console.log('HERE--------------------------',this.isOrgAccount, this.cardData.organization?.id)
     if(this.isOrgAccount) {
-      this.isMine = this.cardData.organization.id === this.profileInfo.id
+      this.isMine = this.cardData.organization?.id === this.profileInfo.id
     }
     
     // Format dates
     this.formatDates();
+    
+    // Load applications for this opportunity
+    this.loadApplications();
   }
 
   formatDates() {
@@ -116,6 +132,9 @@ export class CardComponent implements OnInit {
     this.isModalOpen = true;
     // Prevent scrolling of the background when modal is open
     document.body.style.overflow = 'hidden';
+    
+    // Refresh applications when opening the modal
+    this.loadApplications();
   }
 
   closeModal() {
@@ -124,11 +143,88 @@ export class CardComponent implements OnInit {
     document.body.style.overflow = 'auto';
   }
 
-  applyForOpportunity() {
-    // TODO: Implement application logic
-    console.log('Applying for opportunity:', this.cardData.id);
-    alert('Candidatura submetida com sucesso!');
-    this.closeModal();
+  /**
+   * Load applications for this opportunity
+   */
+  loadApplications() {
+    if (!this.cardData || !this.cardData.id) {
+      console.warn('No opportunity ID available to load applications');
+      return;
+    }
+    
+    this.applicationService.getApplicationsForOffer(this.cardData.id).subscribe(
+      (response) => {
+        console.log('Applications response:', response);
+        if (response && response.data) {
+          this.applications = response.data;
+          
+          // Check if the current user has already applied
+          if (this.profileInfo && this.profileInfo.id) {
+            this.hasApplied = this.applicationService.hasUserApplied(
+              this.cardData.id, 
+              this.profileInfo.id, 
+              this.applications
+            );
+            console.log('User has applied:', this.hasApplied);
+          }
+        } else {
+          this.applications = [];
+          this.hasApplied = false;
+        }
+      },
+      (error) => {
+        console.error('Error loading applications:', error);
+        this.applications = [];
+        this.hasApplied = false;
+      }
+    );
   }
 
+  /**
+   * Apply for the current opportunity
+   */
+  applyForOpportunity() {
+    if (this.isApplying) {
+      return; // Prevent multiple submissions
+    }
+    
+    // Check if user is logged in
+    if (!this.profileInfo || !this.profileInfo.id) {
+      this.applicationError = 'Precisa de iniciar sessão para se candidatar.';
+      return;
+    }
+    
+    // Check if user has already applied
+    if (this.hasApplied) {
+      this.applicationError = 'Já se candidatou a esta oportunidade.';
+      return;
+    }
+    
+    this.isApplying = true;
+    this.applicationError = null;
+    
+    console.log('Applying for opportunity:', this.cardData.id);
+    
+    this.applicationService.applyToOffer(this.cardData.id).subscribe(
+      (response) => {
+        console.log('Application response:', response);
+        this.isApplying = false;
+        
+        if (response && response.data) {
+          // Application successful
+          this.hasApplied = true;
+          alert('Candidatura submetida com sucesso!');
+          this.closeModal();
+        } else {
+          // Application failed
+          this.applicationError = 'Não foi possível submeter a candidatura. Tente novamente.';
+        }
+      },
+      (error) => {
+        console.error('Error applying for opportunity:', error);
+        this.isApplying = false;
+        this.applicationError = 'Erro ao submeter candidatura. Tente novamente mais tarde.';
+      }
+    );
+  }
 }

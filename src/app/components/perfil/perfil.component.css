@@ -111,13 +111,12 @@
 }
 
 .history-item {
-    display: flex;
-    background-color: #fff;
-    border-radius: 12px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border-left: 4px solid #007979;
 }
 
 .history-item:hover {
@@ -143,66 +142,95 @@
 }
 
 .history-content {
-    flex: 1;
-    padding: 15px 20px;
+    padding: 1.5rem;
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
 }
 
 .history-title {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: #007979;
-    text-transform: uppercase;
+    margin: 0;
+    font-size: 1.25rem;
+    color: #333;
+    flex: 1;
 }
 
 .history-description {
-    font-size: 14px;
-    line-height: 1.4;
-    color: #555;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
+    color: #666;
+    margin: 0 0 1rem 0;
+    line-height: 1.5;
+    max-height: 3em;
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: max-height 0.3s ease;
 }
 
 .history-description.expanded {
-    -webkit-line-clamp: unset;
-    margin-bottom: 15px;
+    max-height: none;
 }
 
 .history-details {
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-    font-size: 14px;
-    color: #666;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
 }
 
 .history-details p {
-    margin-bottom: 5px;
+    margin: 0;
+    color: #666;
 }
 
 .history-details strong {
-    color: #007979;
-    margin-right: 5px;
+    color: #333;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.history-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.action-btn.view-applications {
+    background-color: #007979;
+    color: white;
+}
+
+.action-btn.view-applications:hover {
+    background-color: #006666;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 121, 121, 0.2);
 }
 
 .history-expand {
-    display: flex;
-    align-items: center;
-    padding: 0 15px;
-    color: #007979;
     cursor: pointer;
+    padding: 0.5rem;
+    color: #666;
     transition: color 0.2s ease;
 }
 
 .history-expand:hover {
-    color: #64cbfd;
-}
-
-.history-expand i {
-    font-size: 18px;
+    color: #333;
 }
 
 /* Status indicators */
@@ -349,6 +377,18 @@
         padding: 10px;
         justify-content: center;
     }
+    
+    .history-details {
+        grid-template-columns: 1fr;
+    }
+    
+    .history-content {
+        padding: 1rem;
+    }
+    
+    .history-title {
+        font-size: 1.1rem;
+    }
 }
 
 /* Debug info */
@@ -375,4 +415,165 @@
     font-size: 12px;
     white-space: pre-wrap;
     word-break: break-all;
+}
+
+/* Volunteer Applications Styles */
+.volunteer-applications {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.application-item {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    border-left: 4px solid #007979;
+    position: relative;
+}
+
+.application-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.application-content {
+    padding: 20px;
+}
+
+.application-title {
+    font-size: 18px;
+    margin: 0 0 15px 0;
+    color: #007979;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.application-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.application-details p {
+    margin: 0;
+    color: #555;
+    font-size: 14px;
+}
+
+.application-details strong {
+    color: #007979;
+    margin-right: 5px;
+}
+
+.application-status {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    background-color: rgba(0, 121, 121, 0.1);
+    color: #007979;
+}
+
+.application-status.pending {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: #FFC107;
+}
+
+.application-status.accepted {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: #4CAF50;
+}
+
+.application-status.rejected {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: #F44336;
+}
+
+.application-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px;
+}
+
+.application-action-btn {
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    background-color: transparent;
+    color: #007979;
+    border: 1px solid #007979;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.application-action-btn:hover {
+    background-color: #007979;
+    color: white;
+}
+
+.application-action-btn i {
+    margin-right: 5px;
+}
+
+.explore-btn {
+    display: inline-block;
+    background-color: #007979;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    margin-top: 15px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 121, 121, 0.2);
+}
+
+.explore-btn:hover {
+    background-color: #005f5f;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 121, 121, 0.3);
+}
+
+/* Responsive styles for applications */
+@media (max-width: 768px) {
+    .volunteer-applications {
+        gap: 15px;
+    }
+    
+    .application-content {
+        padding: 15px;
+    }
+    
+    .application-title {
+        font-size: 16px;
+    }
+    
+    .application-status {
+        position: static;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+    
+    .application-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .application-action-btn {
+        width: 100%;
+        justify-content: center;
+    }
 }

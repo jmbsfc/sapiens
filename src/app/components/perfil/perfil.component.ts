@@ -6,11 +6,13 @@ import { AuthService } from '../../services/auth.service';
 import { ImageService } from '../../services/image.service';
 import { NgClass, NgFor, NgIf, DatePipe, JsonPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ApplicationService } from '../../services/application.service';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [NgClass, NgFor, NgIf, DatePipe, JsonPipe, FormsModule],
+  imports: [NgClass, NgFor, NgIf, DatePipe, JsonPipe, FormsModule, RouterLink],
   templateUrl: './perfil.component.html',
   styleUrl: './perfil.component.css',
   providers: [DatePipe]
@@ -30,13 +32,16 @@ export class PerfilComponent implements OnInit {
   testImageResult: string | null = null;
   testImageSuccess: boolean = false;
 
+  volunteerApplications: any[] = [];
+
   constructor(
     private volunteerService: VolunteerService,
     private organizationService: OrganizationService,
     private oportunidadesService: OportunidadesService,
     private authService: AuthService,
     private imageService: ImageService,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private applicationService: ApplicationService
   ) {}
 
   ngOnInit() {
@@ -81,7 +86,7 @@ export class PerfilComponent implements OnInit {
         console.log('Profile API response:', response);
         
         if (response && response.data) {
-          this.profileInfo = response.data;
+        this.profileInfo = response.data;
           
           // Determine account type based on response data structure
           this.determineAccountType();
@@ -218,6 +223,9 @@ export class PerfilComponent implements OnInit {
     
     // Load volunteer history
     this.loadVolunteerHistory();
+    
+    // Load volunteer applications
+    this.loadVolunteerApplications();
   }
 
   updateProfileImageUrl() {
@@ -320,28 +328,28 @@ export class PerfilComponent implements OnInit {
         (error) => {
           console.error('Error loading volunteer history:', error);
           // Fallback to placeholder data for demo purposes
-          this.volunteerHistory = [
-            {
-              id: 1,
-              title: 'Limpeza de Praia',
-              description: 'Participação na limpeza da Praia da Costa da Caparica, recolhendo resíduos plásticos e outros materiais poluentes.',
-              date: '2023-06-15',
+    this.volunteerHistory = [
+      {
+        id: 1,
+        title: 'Limpeza de Praia',
+        description: 'Participação na limpeza da Praia da Costa da Caparica, recolhendo resíduos plásticos e outros materiais poluentes.',
+        date: '2023-06-15',
               endDate: '2023-06-15',
-              organization: 'Oceano Limpo',
+        organization: 'Oceano Limpo',
               address: 'Costa da Caparica, Almada',
-              expanded: false
-            },
-            {
-              id: 2,
-              title: 'Distribuição de Alimentos',
-              description: 'Ajuda na distribuição de refeições para pessoas em situação de vulnerabilidade no centro de Lisboa.',
-              date: '2023-04-22',
+        expanded: false
+      },
+      {
+        id: 2,
+        title: 'Distribuição de Alimentos',
+        description: 'Ajuda na distribuição de refeições para pessoas em situação de vulnerabilidade no centro de Lisboa.',
+        date: '2023-04-22',
               endDate: '2023-04-22',
-              organization: 'Comunidade Solidária',
+        organization: 'Comunidade Solidária',
               address: 'Centro de Lisboa',
-              expanded: false
-            }
-          ];
+        expanded: false
+      }
+    ];
         }
       );
     }
@@ -366,18 +374,49 @@ export class PerfilComponent implements OnInit {
               
             console.log('Filtered opportunities for this organization:', filteredOpps);
             
-            this.orgOpportunities = filteredOpps.map((opp: any) => ({
-              id: opp.id,
-              title: opp.title,
-              description: opp.description,
-              startDate: opp.startDate,
-              endDate: opp.endDate,
-              address: opp.address,
-              category: opp.category ? opp.category.name : 'Uncategorized',
-              municipality: opp.municipality ? opp.municipality.name : 'Unknown Location',
-              participantsCount: opp.participants ? opp.participants.length : 0,
-              expanded: false
-            }));
+            // For each opportunity, get the number of applications
+            const opportunityPromises = filteredOpps.map((opp: any) => {
+              return new Promise<any>((resolve) => {
+                this.applicationService.getApplicationsForOffer(opp.id).subscribe(
+                  (appResponse) => {
+                    // Count all applications (not just accepted ones)
+                    const totalCount = appResponse?.data?.length || 0;
+                    
+                    console.log(`Opportunity ${opp.id} has ${totalCount} total applications`);
+                    
+                    resolve({
+                      ...opp,
+                      participantsCount: totalCount
+                    });
+                  },
+                  (error) => {
+                    console.error(`Error loading applications for opportunity ${opp.id}:`, error);
+                    resolve({
+                      ...opp,
+                      participantsCount: 0
+                    });
+                  }
+                );
+              });
+            });
+            
+            // Wait for all application counts to complete
+            Promise.all(opportunityPromises).then(opportunitiesWithCounts => {
+              this.orgOpportunities = opportunitiesWithCounts.map((opp: any) => ({
+                id: opp.id,
+                title: opp.title,
+                description: opp.description,
+                startDate: opp.startDate,
+                endDate: opp.endDate,
+                address: opp.address,
+                category: opp.category ? opp.category.name : 'Uncategorized',
+                municipality: opp.municipality ? opp.municipality.name : 'Unknown Location',
+                participantsCount: opp.participantsCount,
+          expanded: false
+              }));
+              
+              console.log('Final opportunities with participant counts:', this.orgOpportunities);
+            });
           } else {
             console.log('No opportunities data found for organization');
             this.orgOpportunities = [];
@@ -385,33 +424,7 @@ export class PerfilComponent implements OnInit {
         },
         (error) => {
           console.error('Error loading organization opportunities:', error);
-          // Fallback to placeholder data for demo purposes
-          this.orgOpportunities = [
-            {
-              id: 1,
-              title: 'Plantação de Árvores',
-              description: 'Projeto de reflorestação no Parque Natural da Arrábida. Precisamos de voluntários para ajudar a plantar 200 árvores nativas.',
-              startDate: '2023-11-15',
-              endDate: '2023-11-16',
-              address: 'Parque Natural da Arrábida, Setúbal',
-              category: 'Ambiente',
-              municipality: 'Setúbal',
-              participantsCount: 15,
-              expanded: false
-            },
-            {
-              id: 2,
-              title: 'Apoio a Idosos',
-              description: 'Programa de visitas a idosos em situação de isolamento. Os voluntários irão proporcionar companhia e ajuda em pequenas tarefas domésticas.',
-              startDate: '2023-10-01',
-              endDate: '2023-12-31',
-              address: 'Centro de Lisboa',
-              category: 'Apoio Social',
-              municipality: 'Lisboa',
-              participantsCount: 8,
-              expanded: false
-            }
-          ];
+          this.orgOpportunities = [];
         }
       );
     } else {
@@ -548,5 +561,87 @@ export class PerfilComponent implements OnInit {
       .catch(error => {
         console.error('Error testing service URL:', error);
       });
+  }
+
+  /**
+   * Load applications made by the volunteer
+   */
+  loadVolunteerApplications() {
+    if (!this.profileInfo || !this.profileInfo.id) {
+      console.warn('No volunteer ID available to load applications');
+      return;
+    }
+    
+    console.log('Loading applications for volunteer ID:', this.profileInfo.id);
+    
+    // Since the API doesn't provide a direct endpoint to get applications by volunteer ID,
+    // we'll need to get all opportunities and filter the ones the volunteer has applied to
+    this.oportunidadesService.getOportunities().subscribe(
+      (response) => {
+        if (response && response.data) {
+          const opportunities = response.data;
+          console.log('Found opportunities:', opportunities.length);
+          
+          // For each opportunity, check if the volunteer has applied
+          const applicationPromises = opportunities.map((opportunity: any) => {
+            console.log('Checking applications for opportunity:', opportunity.id, opportunity.title);
+            return new Promise<any[]>((resolve) => {
+              this.applicationService.getApplicationsForOffer(opportunity.id).subscribe(
+                (appResponse) => {
+                  if (appResponse && appResponse.data) {
+                    // Filter applications for this volunteer
+                    const volunteerApps = appResponse.data.filter((app: any) => {
+                      const isMatch = app.volunteer && app.volunteer.id === this.profileInfo.id;
+                      if (isMatch) {
+                        console.log('Found matching application:', {
+                          opportunityId: opportunity.id,
+                          opportunityTitle: opportunity.title,
+                          applicationId: app.id,
+                          status: app.status
+                        });
+                      }
+                      return isMatch;
+                    });
+                    
+                    // Add the opportunity data to each application
+                    volunteerApps.forEach((app: any) => {
+                      app.offer = opportunity;
+                    });
+                    
+                    resolve(volunteerApps);
+                  } else {
+                    console.log('No applications found for opportunity:', opportunity.id);
+                    resolve([]);
+                  }
+                },
+                (error) => {
+                  console.error(`Error loading applications for opportunity ${opportunity.id}:`, error);
+                  resolve([]);
+                }
+              );
+            });
+          });
+          
+          // Wait for all application requests to complete
+          Promise.all(applicationPromises).then(applicationsArrays => {
+            // Flatten the array of arrays into a single array
+            this.volunteerApplications = applicationsArrays.flat();
+            console.log('Final volunteer applications:', {
+              totalApplications: this.volunteerApplications.length,
+              applications: this.volunteerApplications.map(app => ({
+                id: app.id,
+                opportunityId: app.offer.id,
+                opportunityTitle: app.offer.title,
+                status: app.status
+              }))
+            });
+          });
+        }
+      },
+      (error) => {
+        console.error('Error loading opportunities for applications:', error);
+        this.volunteerApplications = [];
+      }
+    );
   }
 }

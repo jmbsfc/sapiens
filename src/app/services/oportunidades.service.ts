@@ -18,6 +18,13 @@ export class OportunidadesService {
         );
   }
 
+  public getOpportunity(id: number): Observable<any> {
+    return this.http.get<{data: any}>(`${this.apiUrl}/offers/${id}`)
+      .pipe(
+        tap(response => console.log('Single opportunity response:', response))
+      );
+  }
+
   public getFilteredOpportunities(categoryId?: string, municipalityId?: string): Observable<any> {
     let url = `${this.apiUrl}/offers`;
     

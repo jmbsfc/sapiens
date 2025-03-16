@@ -1,0 +1,71 @@
+<div class="applications-container">
+    <!-- Loading indicator -->
+    <div class="loading-indicator" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>A carregar candidaturas...</p>
+    </div>
+
+    <!-- Error message -->
+    <div class="error-message" *ngIf="error">
+        <p>{{ error }}</p>
+    </div>
+
+    <!-- Applications content when loaded -->
+    <div *ngIf="!isLoading && !error">
+        <div class="applications-header">
+            <h1>Candidaturas às Suas Oportunidades</h1>
+            <p class="applications-count">Total: {{ getTotalApplicationsCount() }} candidatura(s)</p>
+        </div>
+
+        <!-- No opportunities message -->
+        <div class="no-opportunities" *ngIf="opportunities.length === 0">
+            <h2>Sem Oportunidades</h2>
+            <p>Ainda não criou nenhuma oportunidade de voluntariado. Crie uma oportunidade para começar a receber candidaturas.</p>
+            <a href="/oportunidades" class="create-opportunity-btn">Criar Oportunidade</a>
+        </div>
+
+        <!-- Opportunities with applications -->
+        <div class="opportunities-list" *ngIf="opportunities.length > 0">
+            <div class="opportunity-item" *ngFor="let opportunity of opportunities">
+                <div class="opportunity-header">
+                    <h2>{{ opportunity.title }}</h2>
+                    <span class="applications-badge">{{ getApplicationsForOpportunity(opportunity.id).length }} candidatura(s)</span>
+                </div>
+
+                <!-- No applications message -->
+                <div class="no-applications" *ngIf="!hasApplications(opportunity.id)">
+                    <p>Ainda não há candidaturas para esta oportunidade.</p>
+                </div>
+
+                <!-- Applications list -->
+                <div class="applications-list" *ngIf="hasApplications(opportunity.id)">
+                    <div class="application-item" *ngFor="let application of getApplicationsForOpportunity(opportunity.id)">
+                        <div class="applicant-info">
+                            <div class="applicant-avatar">
+                                <img [src]="application.volunteer.imageUrl ? 'http://localhost:8080' + application.volunteer.imageUrl : 'assets/images/default-avatar.svg'" 
+                                     alt="Volunteer Avatar">
+                            </div>
+                            <div class="applicant-details">
+                                <h3>{{ application.volunteer.firstName }} {{ application.volunteer.lastName }}</h3>
+                                <div class="contact-info">
+                                    <p *ngIf="application.volunteer.user?.email">
+                                        <i class="fas fa-envelope"></i> 
+                                        <a href="mailto:{{ application.volunteer.user.email }}" class="contact-link">
+                                            {{ application.volunteer.user.email }}
+                                        </a>
+                                    </p>
+                                    <p *ngIf="application.volunteer.user?.phoneNumber">
+                                        <i class="fas fa-phone"></i> 
+                                        <a href="tel:{{ application.volunteer.user.phoneNumber }}" class="contact-link">
+                                            {{ application.volunteer.user.phoneNumber }}
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

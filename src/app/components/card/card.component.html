@@ -57,7 +57,25 @@
         </div>
         
         <div class="modal-footer">
-            <button class="btn-apply" *ngIf="!isOrgAccount" (click)="applyForOpportunity()">Candidatar-me</button>
+            <div *ngIf="!isOrgAccount" class="application-section">
+                <div *ngIf="applicationError" class="application-error">
+                    {{ applicationError }}
+                </div>
+                
+                <button *ngIf="!hasApplied" class="btn-apply" [disabled]="isApplying" (click)="applyForOpportunity()">
+                    <span *ngIf="!isApplying">Candidatar-me</span>
+                    <span *ngIf="isApplying">A processar...</span>
+                </button>
+                
+                <div *ngIf="hasApplied" class="application-success">
+                    <i class="fas fa-check-circle"></i> Já se candidatou a esta oportunidade
+                </div>
+            </div>
+            
+            <div *ngIf="isOrgAccount && isMine" class="applications-info">
+                <p>{{ applications.length }} candidato(s) para esta oportunidade</p>
+            </div>
+            
             <button class="btn-close" (click)="closeModal()">Fechar</button>
         </div>
     </div>
