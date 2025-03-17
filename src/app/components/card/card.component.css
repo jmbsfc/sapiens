@@ -19,7 +19,7 @@
     color: white;
     width: auto;
     min-width: 120px;
-    border-radius: 20px;
+    border-radius: 18px;
     position: absolute;
     text-align: center;
     right: 15px;
@@ -52,6 +52,16 @@
     content: '✓';
     font-size: 14px;
     font-weight: bold;
+}
+
+/* Applied badge specific styles */
+.card-tag.applied {
+    background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+}
+
+.card-tag.applied p::before {
+    content: '✓';
 }
 
 .card-img {
@@ -99,6 +109,7 @@
 .card-location img {
     width: 16px;
     height: 16px;
+    margin-top: 20px;
     margin-right: 8px;
     opacity: 0.7;
 }

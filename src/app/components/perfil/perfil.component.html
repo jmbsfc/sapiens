@@ -16,8 +16,13 @@
         <div class="profile-header">
             <div class="profile-picture">
                 <img [src]="profileImageUrl" alt="Profile Picture" (error)="handleImageError()" crossorigin="anonymous">
-    </div>
-    <div class="profile-info">
+                
+                <!-- Debug info for profile image -->
+                <div *ngIf="profileInfo?.imageUrl" class="image-debug" style="font-size: 10px; margin-top: 5px; color: #666;">
+                    <p>Image path: {{ profileInfo?.imageUrl }}</p>
+                </div>
+            </div>
+            <div class="profile-info">
                 <!-- Volunteer profile info -->
                 <div *ngIf="!isOrgAccount">
                     <h1 class="profile-title">
@@ -98,6 +103,13 @@
                          alt="Direct Image" style="max-width: 100px; border: 1px solid #ccc;" 
                          (error)="handleDirectImageError()">
                     <p *ngIf="directImageError" style="color: red;">Failed to load direct image</p>
+                    <p style="font-size: 10px; word-break: break-all;">URL: http://localhost:8080{{ profileInfo?.imageUrl }}</p>
+                </div>
+                <div>
+                    <p><strong>Service Image URL:</strong></p>
+                    <img *ngIf="profileInfo?.imageUrl" [src]="profileImageUrl" 
+                         alt="Service Image" style="max-width: 100px; border: 1px solid #ccc;">
+                    <p style="font-size: 10px; word-break: break-all;">URL: {{ profileImageUrl }}</p>
                 </div>
                 <div>
                     <p><strong>Default Avatar:</strong></p>
@@ -114,6 +126,13 @@
                     <img *ngIf="testImageSuccess" [src]="testImageUrl" alt="Test Image" style="max-width: 100px; border: 1px solid #ccc;">
                 </div>
             </div>
+            
+            <div style="margin-top: 20px;">
+                <p><strong>Test All Image Formats:</strong></p>
+                <button (click)="testAllImageFormats()" style="padding: 5px 10px;">Test All Formats</button>
+                <p style="font-size: 12px; margin-top: 5px;">This will test all possible URL formats for your profile image and log the results to the console.</p>
+            </div>
+            
             <hr>
             <p><strong>Full Profile Info:</strong></p>
             <pre>{{ profileInfo | json }}</pre>
@@ -156,7 +175,7 @@
         <!-- Organization Opportunities Section -->
         <div class="profile-section" *ngIf="isOrgAccount">
             <h2 class="section-title">
-                <i class="fas fa-hands-helping"></i> Created Opportunities
+                <i class="fas fa-hands-helping"></i> Oportunidades Criadas
             </h2>
             
             <div class="volunteer-history" *ngIf="orgOpportunities.length > 0">
@@ -172,11 +191,11 @@
                             {{ item.description }}
                         </p>
                         <div class="history-details" *ngIf="item.expanded">
-                            <p><strong>Category:</strong> {{ item.category }}</p>
-                            <p><strong>Location:</strong> {{ item.municipality }}</p>
-                            <p><strong>Address:</strong> {{ item.address }}</p>
-                            <p><strong>Date:</strong> {{ formatDate(item.startDate) }} - {{ formatDate(item.endDate) }}</p>
-                            <p><strong>Participants:</strong> {{ item.participantsCount }}</p>
+                            <p><strong>Categoria:</strong> {{ item.category }}</p>
+                            <p><strong>Localização:</strong> {{ item.municipality }}</p>
+                            <p><strong>Endereço:</strong> {{ item.address }}</p>
+                            <p><strong>Data:</strong> {{ formatDate(item.startDate) }} - {{ formatDate(item.endDate) }}</p>
+                            <p><strong>Nº de Participantes:</strong> {{ item.participantsCount }}</p>
                         </div>
                         <div class="history-actions" *ngIf="item.expanded">
                             <a [routerLink]="['/oportunidades', item.id, 'candidaturas']" class="action-btn view-applications">

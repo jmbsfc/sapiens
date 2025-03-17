@@ -2,6 +2,9 @@
     <div class="card-tag" *ngIf="isMine">
         <p>Criada Por Si</p>
     </div>
+    <div class="card-tag applied" *ngIf="hasApplied && !isMine">
+        <p>Já Candidatado</p>
+    </div>
     <div class="card-img">
         <img src="cardplaceholder.png" />
     </div>

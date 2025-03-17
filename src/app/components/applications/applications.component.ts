@@ -5,6 +5,7 @@ import { OportunidadesService } from '../../services/oportunidades.service';
 import { AuthService } from '../../services/auth.service';
 import { OrganizationService } from '../../services/organization.service';
 import { ActivatedRoute } from '@angular/router';
+import { ImageService } from '../../services/image.service';
 
 interface User {
   organizationId: number;
@@ -31,6 +32,7 @@ export class ApplicationsComponent implements OnInit {
     private opportunitiesService: OportunidadesService,
     private authService: AuthService,
     private organizationService: OrganizationService,
+    private imageService: ImageService,
     private route: ActivatedRoute
   ) {}
 
@@ -46,6 +48,29 @@ export class ApplicationsComponent implements OnInit {
         this.loadOrganizationOpportunities();
       }
     });
+  }
+
+  /**
+   * Get the image URL for a volunteer
+   * @param volunteer The volunteer object
+   * @returns The URL to the volunteer's profile image
+   */
+  getVolunteerImageUrl(volunteer: any): string {
+    if (!volunteer) {
+      return this.imageService.getDefaultAvatarPath();
+    }
+    
+    return this.imageService.getProfileImageUrl(volunteer.imageUrl);
+  }
+
+  /**
+   * Handle image loading errors
+   * @param event The error event
+   */
+  handleImageError(event: Event): void {
+    const imgElement = event.target as HTMLImageElement;
+    console.error('Error loading image:', imgElement.src);
+    imgElement.src = this.imageService.getDefaultAvatarPath();
   }
 
   /**

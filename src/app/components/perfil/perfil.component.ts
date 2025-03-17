@@ -154,6 +154,7 @@ export class PerfilComponent implements OnInit {
     // Test the specific image path if available
     if (this.profileInfo.imageUrl) {
       this.testProfileImagePath();
+      this.testAllImageFormats();
     }
     
     // Load organization opportunities
@@ -161,51 +162,13 @@ export class PerfilComponent implements OnInit {
   }
   
   processVolunteerProfile() {
-    // Fix birthday if it has the 0017 issue
-    if (this.profileInfo.birthday && this.profileInfo.birthday.endsWith('0017')) {
-      console.log('Fixing birthday with 0017 issue:', this.profileInfo.birthday);
-      const actualDate = this.profileInfo.birthday.substring(0, 10);
-      console.log('Extracted actual date:', actualDate);
-      this.profileInfo.birthday = actualDate;
-      console.log('Fixed birthday:', this.profileInfo.birthday);
+    // Ensure we have the volunteer's data properly mapped
+    if (!this.profileInfo.email && this.profileInfo.user && this.profileInfo.user.email) {
+      this.profileInfo.email = this.profileInfo.user.email;
     }
     
-    // Debug birthday format
-    if (this.profileInfo.birthday) {
-      console.log('Birthday format in response:', this.profileInfo.birthday);
-      console.log('Birthday after parsing:', new Date(this.profileInfo.birthday));
-      console.log('Birthday after formatting:', this.formatDate(this.profileInfo.birthday));
-    } else {
-      console.log('No birthday found in profile data');
-    }
-    
-    // Handle nested user data structure
-    if (this.profileInfo.user) {
-      console.log('User data found in response:', this.profileInfo.user);
-      
-      // Map firstName from user object if not directly available
-      if (!this.profileInfo.firstName && this.profileInfo.user.firstName) {
-        this.profileInfo.firstName = this.profileInfo.user.firstName;
-        console.log('Mapped firstName from user object:', this.profileInfo.firstName);
-      }
-      
-      // Map lastName from user object if not directly available
-      if (!this.profileInfo.lastName && this.profileInfo.user.lastName) {
-        this.profileInfo.lastName = this.profileInfo.user.lastName;
-        console.log('Mapped lastName from user object:', this.profileInfo.lastName);
-      }
-      
-      // Map email from user object if not directly available
-      if (!this.profileInfo.email && this.profileInfo.user.email) {
-        this.profileInfo.email = this.profileInfo.user.email;
-        console.log('Mapped email from user object:', this.profileInfo.email);
-      }
-      
-      // Map phoneNumber from user object if not directly available
-      if (!this.profileInfo.phoneNumber && this.profileInfo.user.phoneNumber) {
-        this.profileInfo.phoneNumber = this.profileInfo.user.phoneNumber;
-        console.log('Mapped phoneNumber from user object:', this.profileInfo.phoneNumber);
-      }
+    if (!this.profileInfo.phoneNumber && this.profileInfo.user && this.profileInfo.user.phoneNumber) {
+      this.profileInfo.phoneNumber = this.profileInfo.user.phoneNumber;
     }
     
     // Set profile image URL
@@ -214,9 +177,9 @@ export class PerfilComponent implements OnInit {
     // Test the specific image path if available
     if (this.profileInfo.imageUrl) {
       this.testProfileImagePath();
+      this.testAllImageFormats();
     }
     
-    // Check if we have the necessary data after mapping
     if (!this.profileInfo.firstName || !this.profileInfo.lastName) {
       console.warn('Missing name data in profile:', this.profileInfo);
     }
@@ -234,24 +197,22 @@ export class PerfilComponent implements OnInit {
       
       // Log the image URL structure
       console.log('Image URL type:', typeof this.profileInfo.imageUrl);
-      console.log('Image URL starts with /images/:', 
-        typeof this.profileInfo.imageUrl === 'string' && this.profileInfo.imageUrl.startsWith('/images/'));
+      console.log('Image URL value:', this.profileInfo.imageUrl);
       
-      // Use the image service to get the correct URL
-      const originalUrl = this.profileInfo.imageUrl;
-      this.profileImageUrl = this.imageService.getImageUrl(this.profileInfo.imageUrl);
-      console.log('Profile image URL transformation:', originalUrl, ' -> ', this.profileImageUrl);
-      
-      // Check if the image exists
-      this.checkImageExists(this.profileImageUrl).then(exists => {
-        if (!exists) {
-          console.warn('Image does not exist, falling back to default');
-          this.profileImageUrl = 'assets/images/default-avatar.svg';
+      // Use the validateImageUrl method to check if the image exists
+      this.imageService.validateImageUrl(this.profileInfo.imageUrl).subscribe(
+        (validatedUrl) => {
+          this.profileImageUrl = validatedUrl;
+          console.log('Profile image URL set to (validated):', this.profileImageUrl);
+        },
+        (error) => {
+          console.error('Error validating image URL:', error);
+          this.profileImageUrl = this.imageService.getDefaultAvatarPath();
         }
-      });
+      );
     } else {
       console.log('No image URL found in profile, using default');
-      this.profileImageUrl = 'assets/images/default-avatar.svg';
+      this.profileImageUrl = this.imageService.getDefaultAvatarPath();
     }
   }
 
@@ -270,8 +231,34 @@ export class PerfilComponent implements OnInit {
   }
 
   handleImageError() {
-    console.error('Error loading profile image, falling back to default');
-    this.profileImageUrl = 'assets/images/default-avatar.svg';
+    console.error('Error loading profile image from URL:', this.profileImageUrl);
+    
+    // Try to validate the image URL
+    if (this.profileInfo && this.profileInfo.imageUrl) {
+      console.log('Attempting to validate image URL after error');
+      
+      // Use the validateImageUrl method to check if the image exists
+      this.imageService.validateImageUrl(this.profileInfo.imageUrl).subscribe(
+        (validatedUrl) => {
+          if (validatedUrl !== this.profileImageUrl) {
+            console.log('Using validated URL instead:', validatedUrl);
+            this.profileImageUrl = validatedUrl;
+          } else {
+            // If the validated URL is the same as the current URL, use the default avatar
+            console.log('Validated URL is the same as current URL, using default avatar');
+            this.profileImageUrl = this.imageService.getDefaultAvatarPath();
+          }
+        },
+        (error) => {
+          console.error('Error validating image URL:', error);
+          this.profileImageUrl = this.imageService.getDefaultAvatarPath();
+        }
+      );
+    } else {
+      // If we get here, all attempts failed, use the default avatar
+      console.error('All attempts to load profile image failed, falling back to default');
+      this.profileImageUrl = this.imageService.getDefaultAvatarPath();
+    }
   }
 
   handleDirectImageError() {
@@ -643,5 +630,70 @@ export class PerfilComponent implements OnInit {
         this.volunteerApplications = [];
       }
     );
+  }
+
+  /**
+   * Tests all possible image URL formats for the profile image
+   */
+  testAllImageFormats() {
+    if (!this.profileInfo || !this.profileInfo.imageUrl) {
+      console.warn('No image URL available to test');
+      return;
+    }
+    
+    const imageUrl = this.profileInfo.imageUrl;
+    console.log('Testing all possible formats for image URL:', imageUrl);
+    
+    // Format 1: Direct URL with API base
+    const format1 = `http://localhost:8080${imageUrl}`;
+    this.testImageFormat('Format 1 (Direct with API base)', format1);
+    
+    // Format 2: Using image service
+    const format2 = this.imageService.getImageUrl(imageUrl);
+    this.testImageFormat('Format 2 (Image Service)', format2);
+    
+    // Format 3: API base + /images/ + filename
+    let filename = imageUrl;
+    if (filename.startsWith('/')) {
+      filename = filename.substring(1);
+    }
+    if (filename.startsWith('images/')) {
+      filename = filename.substring(7);
+    }
+    const format3 = `http://localhost:8080/images/${filename}`;
+    this.testImageFormat('Format 3 (API base + /images/ + filename)', format3);
+    
+    // Format 4: API base + /images + path
+    let path = imageUrl;
+    if (!path.startsWith('/')) {
+      path = '/' + path;
+    }
+    if (!path.startsWith('/images/') && !path.startsWith('/images')) {
+      path = '/images' + path;
+    }
+    const format4 = `http://localhost:8080${path}`;
+    this.testImageFormat('Format 4 (API base + /images + path)', format4);
+  }
+  
+  /**
+   * Tests a specific image URL format
+   * @param label The label for the format
+   * @param url The URL to test
+   */
+  private testImageFormat(label: string, url: string) {
+    console.log(`Testing ${label}: ${url}`);
+    
+    fetch(url)
+      .then(response => {
+        console.log(`${label} result:`, response.status, response.ok);
+        if (response.ok) {
+          console.log(`✅ ${label} SUCCESS`);
+        } else {
+          console.warn(`❌ ${label} FAILED`);
+        }
+      })
+      .catch(error => {
+        console.error(`❌ ${label} ERROR:`, error);
+      });
   }
 }

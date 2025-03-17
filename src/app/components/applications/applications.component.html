@@ -42,8 +42,12 @@
                     <div class="application-item" *ngFor="let application of getApplicationsForOpportunity(opportunity.id)">
                         <div class="applicant-info">
                             <div class="applicant-avatar">
-                                <img [src]="application.volunteer.imageUrl ? 'http://localhost:8080' + application.volunteer.imageUrl : 'assets/images/default-avatar.svg'" 
-                                     alt="Volunteer Avatar">
+                                <img [src]="getVolunteerImageUrl(application.volunteer)" 
+                                     alt="Volunteer Avatar" (error)="handleImageError($event)">
+                                <!-- Debug info for image URL -->
+                                <div class="image-debug" style="font-size: 8px; color: #999; margin-top: 2px; word-break: break-all;">
+                                    {{ application.volunteer?.imageUrl || 'No image URL' }}
+                                </div>
                             </div>
                             <div class="applicant-details">
                                 <h3>{{ application.volunteer.firstName }} {{ application.volunteer.lastName }}</h3>

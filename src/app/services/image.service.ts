@@ -1,12 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ImageService {
   private apiUrl = "http://localhost:8080";
+  private defaultAvatarPath = 'assets/images/default-avatar.svg';
 
   constructor(private http: HttpClient) { }
 
@@ -33,7 +35,7 @@ export class ImageService {
     // Return default avatar if no filename or 'n'
     if (!filename || filename === 'n') {
       console.log('No filename or "n" provided, returning default avatar');
-      return 'assets/images/default-avatar.svg';
+      return this.defaultAvatarPath;
     }
     
     // Handle full URLs (in case the backend returns a complete URL)
@@ -42,16 +44,89 @@ export class ImageService {
       return filename;
     }
     
-    // Check if the filename already starts with '/images/'
+    // Extract the filename from the path
+    let extractedFilename = filename;
+    
+    // If the path starts with '/images/', extract just the filename
     if (filename.startsWith('/images/')) {
-      const fullUrl = `${this.apiUrl}${filename}`;
-      console.log('Path starts with /images/, returning:', fullUrl);
-      return fullUrl;
+      extractedFilename = filename.substring('/images/'.length);
+      console.log('Extracted filename from /images/ path:', extractedFilename);
+    } 
+    // If the path starts with a slash but not '/images/'
+    else if (filename.startsWith('/') && !filename.startsWith('/images/')) {
+      // Remove the leading slash
+      extractedFilename = filename.substring(1);
+      console.log('Removed leading slash from path:', extractedFilename);
     }
     
-    // Otherwise, assume it's just a filename and construct the full path
-    const fullUrl = `${this.apiUrl}/images/${filename}`;
-    console.log('Treating as filename, returning:', fullUrl);
+    // Construct the full URL to the image
+    const fullUrl = `${this.apiUrl}/images/${extractedFilename}`;
+    console.log('Final image URL:', fullUrl);
     return fullUrl;
+  }
+
+  /**
+   * Checks if an image exists at the given URL
+   * @param url The URL to check
+   * @returns An Observable that resolves to true if the image exists, false otherwise
+   */
+  checkImageExists(url: string): Observable<boolean> {
+    return this.http.head(url, { observe: 'response' })
+      .pipe(
+        map(response => response.status === 200),
+        catchError(() => of(false))
+      );
+  }
+  
+  /**
+   * Gets the profile image URL for a user
+   * This is a helper method that handles all the common cases for profile images
+   * @param imageUrl The image URL from the user profile
+   * @returns The full URL to the profile image, or the default avatar if the image doesn't exist
+   */
+  getProfileImageUrl(imageUrl: string | null | undefined): string {
+    if (!imageUrl) {
+      return this.defaultAvatarPath;
+    }
+    
+    // Try to get the image URL using the standard method
+    return this.getImageUrl(imageUrl);
+  }
+  
+  /**
+   * Gets the default avatar path
+   * @returns The path to the default avatar
+   */
+  getDefaultAvatarPath(): string {
+    return this.defaultAvatarPath;
+  }
+  
+  /**
+   * Validates an image URL by checking if it exists
+   * If the image doesn't exist, returns the default avatar path
+   * @param imageUrl The image URL to validate
+   * @returns An Observable that resolves to the validated image URL
+   */
+  validateImageUrl(imageUrl: string): Observable<string> {
+    if (!imageUrl || imageUrl === 'n') {
+      return of(this.defaultAvatarPath);
+    }
+    
+    const fullUrl = this.getImageUrl(imageUrl);
+    
+    return this.checkImageExists(fullUrl).pipe(
+      map(exists => {
+        if (exists) {
+          return fullUrl;
+        } else {
+          console.warn(`Image does not exist at ${fullUrl}, using default avatar`);
+          return this.defaultAvatarPath;
+        }
+      }),
+      catchError(() => {
+        console.error(`Error checking if image exists at ${fullUrl}, using default avatar`);
+        return of(this.defaultAvatarPath);
+      })
+    );
   }
 } 
