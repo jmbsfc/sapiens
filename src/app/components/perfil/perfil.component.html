@@ -15,11 +15,16 @@
         <!-- Profile header section -->
         <div class="profile-header">
             <div class="profile-picture">
-                <img [src]="profileImageUrl" alt="Profile Picture" (error)="handleImageError()" crossorigin="anonymous">
+                <img [src]="profileImageUrl" 
+                     alt="Profile Picture" 
+                     (error)="handleImageError()" 
+                     crossorigin="anonymous"
+                     [class.loading]="isLoading">
                 
                 <!-- Debug info for profile image -->
                 <div *ngIf="profileInfo?.imageUrl" class="image-debug" style="font-size: 10px; margin-top: 5px; color: #666;">
                     <p>Image path: {{ profileInfo?.imageUrl }}</p>
+                    <p>Full URL: {{ profileImageUrl }}</p>
                 </div>
             </div>
             <div class="profile-info">
@@ -175,7 +180,7 @@
         <!-- Organization Opportunities Section -->
         <div class="profile-section" *ngIf="isOrgAccount">
             <h2 class="section-title">
-                <i class="fas fa-hands-helping"></i> Oportunidades Criadas
+                <i class="fas fa-hands-helping"></i> Created Opportunities
             </h2>
             
             <div class="volunteer-history" *ngIf="orgOpportunities.length > 0">
@@ -191,11 +196,11 @@
                             {{ item.description }}
                         </p>
                         <div class="history-details" *ngIf="item.expanded">
-                            <p><strong>Categoria:</strong> {{ item.category }}</p>
-                            <p><strong>Localização:</strong> {{ item.municipality }}</p>
-                            <p><strong>Endereço:</strong> {{ item.address }}</p>
-                            <p><strong>Data:</strong> {{ formatDate(item.startDate) }} - {{ formatDate(item.endDate) }}</p>
-                            <p><strong>Nº de Participantes:</strong> {{ item.participantsCount }}</p>
+                            <p><strong>Category:</strong> {{ item.category }}</p>
+                            <p><strong>Location:</strong> {{ item.municipality }}</p>
+                            <p><strong>Address:</strong> {{ item.address }}</p>
+                            <p><strong>Date:</strong> {{ formatDate(item.startDate) }} - {{ formatDate(item.endDate) }}</p>
+                            <p><strong>Participants:</strong> {{ item.participantsCount }}</p>
                         </div>
                         <div class="history-actions" *ngIf="item.expanded">
                             <a [routerLink]="['/oportunidades', item.id, 'candidaturas']" class="action-btn view-applications">

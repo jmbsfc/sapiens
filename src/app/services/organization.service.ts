@@ -29,8 +29,17 @@ export class OrganizationService {
   };
 
   setOrganizationInfo(): void {
-    this.organizationInfo = this.getProfileInfo;
-    this.organizationInfo.isOrgAccount = true;
+    this.getProfileInfo().subscribe(
+      (response) => {
+        if (response && response.data) {
+          this.organizationInfo = response.data;
+          this.organizationInfo.isOrgAccount = true;
+        }
+      },
+      (error) => {
+        console.error('Error setting organization info:', error);
+      }
+    );
   };
 
 }

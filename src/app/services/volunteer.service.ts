@@ -44,10 +44,19 @@ export class VolunteerService {
 
   getVolunteerInfo(): any {
     return this.volunteerInfo;
-  };
+  }
 
   setVolunteerInfo(): void {
-    this.volunteerInfo = this.getProfileInfo;
-    this.volunteerInfo.isOrgAccount = false;
-  };
+    this.getProfileInfo().subscribe(
+      (response) => {
+        if (response && response.data) {
+          this.volunteerInfo = response.data;
+          this.volunteerInfo.isOrgAccount = false;
+        }
+      },
+      (error) => {
+        console.error('Error setting volunteer info:', error);
+      }
+    );
+  }
 }

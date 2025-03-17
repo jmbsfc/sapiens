@@ -21,7 +21,13 @@ export class ImageService {
     const formData = new FormData();
     formData.append('image', imageFile);
     
-    return this.http.post<{data: string}>(`${this.apiUrl}/images`, formData);
+    return this.http.post<{data: string}>(`${this.apiUrl}/images`, formData)
+      .pipe(
+        catchError(error => {
+          console.error('Error uploading image:', error);
+          throw error;
+        })
+      );
   }
 
   /**
@@ -71,11 +77,15 @@ export class ImageService {
    * @returns An Observable that resolves to true if the image exists, false otherwise
    */
   checkImageExists(url: string): Observable<boolean> {
-    return this.http.head(url, { observe: 'response' })
-      .pipe(
-        map(response => response.status === 200),
-        catchError(() => of(false))
-      );
+    return this.http.head(url, { 
+      observe: 'response',
+      headers: {
+        'Accept': 'image/*'
+      }
+    }).pipe(
+      map(response => response.status === 200),
+      catchError(() => of(false))
+    );
   }
   
   /**
@@ -95,7 +105,7 @@ export class ImageService {
   
   /**
    * Gets the default avatar path
-   * @returns The path to the default avatar
+   * @returns The path to the default avatar image
    */
   getDefaultAvatarPath(): string {
     return this.defaultAvatarPath;

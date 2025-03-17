@@ -59,21 +59,41 @@ export class PerfilComponent implements OnInit {
    * Tests if the image server is working correctly
    */
   testImageServer() {
-    const testUrl = `${this.imageService['apiUrl']}/images/test`;
-    console.log('Testing image server with URL:', testUrl);
-    
-    fetch(testUrl)
-      .then(response => {
-        console.log('Image server test response:', response.status, response.ok);
-        if (!response.ok) {
-          console.warn('Image server test failed, server might not be serving images correctly');
-        } else {
-          console.log('Image server test successful');
-        }
-      })
-      .catch(error => {
-        console.error('Error testing image server:', error);
-      });
+    // Test with the profile image URL if available
+    if (this.profileInfo && this.profileInfo.imageUrl) {
+      const testUrl = `${this.imageService['apiUrl']}${this.profileInfo.imageUrl}`;
+      console.log('Testing image server with profile image URL:', testUrl);
+      
+      fetch(testUrl)
+        .then(response => {
+          console.log('Image server test response:', response.status, response.ok);
+          if (!response.ok) {
+            console.warn('Image server test failed, server might not be serving images correctly');
+          } else {
+            console.log('Image server test successful');
+          }
+        })
+        .catch(error => {
+          console.error('Error testing image server:', error);
+        });
+    } else {
+      // Fallback to testing with default avatar if no profile image
+      const testUrl = `${this.imageService['apiUrl']}/images/default-avatar.svg`;
+      console.log('Testing image server with default avatar:', testUrl);
+      
+      fetch(testUrl)
+        .then(response => {
+          console.log('Image server test response:', response.status, response.ok);
+          if (!response.ok) {
+            console.warn('Image server test failed, server might not be serving images correctly');
+          } else {
+            console.log('Image server test successful');
+          }
+        })
+        .catch(error => {
+          console.error('Error testing image server:', error);
+        });
+    }
   }
 
   loadProfileData() {
@@ -86,7 +106,17 @@ export class PerfilComponent implements OnInit {
         console.log('Profile API response:', response);
         
         if (response && response.data) {
-        this.profileInfo = response.data;
+          this.profileInfo = response.data;
+          
+          // Log the profile data for debugging
+          console.log('Profile data loaded:', {
+            id: this.profileInfo.id,
+            imageUrl: this.profileInfo.imageUrl,
+            user: this.profileInfo.user,
+            name: this.profileInfo.name,
+            firstName: this.profileInfo.firstName,
+            lastName: this.profileInfo.lastName
+          });
           
           // Determine account type based on response data structure
           this.determineAccountType();
@@ -99,6 +129,9 @@ export class PerfilComponent implements OnInit {
             console.log('Processing as volunteer profile');
             this.processVolunteerProfile();
           }
+          
+          // Set the profile image URL after processing
+          this.updateProfileImageUrl();
           
           this.isLoading = false;
         } else {
@@ -199,17 +232,30 @@ export class PerfilComponent implements OnInit {
       console.log('Image URL type:', typeof this.profileInfo.imageUrl);
       console.log('Image URL value:', this.profileInfo.imageUrl);
       
-      // Use the validateImageUrl method to check if the image exists
-      this.imageService.validateImageUrl(this.profileInfo.imageUrl).subscribe(
-        (validatedUrl) => {
-          this.profileImageUrl = validatedUrl;
-          console.log('Profile image URL set to (validated):', this.profileImageUrl);
-        },
-        (error) => {
-          console.error('Error validating image URL:', error);
+      // Ensure the image URL starts with /images/
+      let imageUrl = this.profileInfo.imageUrl;
+      if (!imageUrl.startsWith('/images/')) {
+        imageUrl = '/images/' + imageUrl.replace(/^\/+/, '');
+        console.log('Normalized image URL:', imageUrl);
+      }
+      
+      // Use the image service to get the full URL
+      const fullImageUrl = this.imageService.getImageUrl(imageUrl);
+      console.log('Full image URL:', fullImageUrl);
+      
+      // Test if the image exists
+      this.checkImageExists(fullImageUrl).then(exists => {
+        if (exists) {
+          console.log('Image exists at URL:', fullImageUrl);
+          this.profileImageUrl = fullImageUrl;
+        } else {
+          console.warn('Image not found at URL:', fullImageUrl);
           this.profileImageUrl = this.imageService.getDefaultAvatarPath();
         }
-      );
+      }).catch(error => {
+        console.error('Error checking image existence:', error);
+        this.profileImageUrl = this.imageService.getDefaultAvatarPath();
+      });
     } else {
       console.log('No image URL found in profile, using default');
       this.profileImageUrl = this.imageService.getDefaultAvatarPath();
@@ -237,23 +283,23 @@ export class PerfilComponent implements OnInit {
     if (this.profileInfo && this.profileInfo.imageUrl) {
       console.log('Attempting to validate image URL after error');
       
-      // Use the validateImageUrl method to check if the image exists
-      this.imageService.validateImageUrl(this.profileInfo.imageUrl).subscribe(
-        (validatedUrl) => {
-          if (validatedUrl !== this.profileImageUrl) {
-            console.log('Using validated URL instead:', validatedUrl);
-            this.profileImageUrl = validatedUrl;
-          } else {
-            // If the validated URL is the same as the current URL, use the default avatar
-            console.log('Validated URL is the same as current URL, using default avatar');
-            this.profileImageUrl = this.imageService.getDefaultAvatarPath();
-          }
-        },
-        (error) => {
-          console.error('Error validating image URL:', error);
+      // Use the image service to get a fresh URL
+      const freshUrl = this.imageService.getImageUrl(this.profileInfo.imageUrl);
+      console.log('Fresh image URL:', freshUrl);
+      
+      // Test if the image exists at the fresh URL
+      this.checkImageExists(freshUrl).then(exists => {
+        if (exists) {
+          console.log('Image exists at fresh URL, updating profile image');
+          this.profileImageUrl = freshUrl;
+        } else {
+          console.warn('Image not found at fresh URL, using default avatar');
           this.profileImageUrl = this.imageService.getDefaultAvatarPath();
         }
-      );
+      }).catch(error => {
+        console.error('Error checking image existence:', error);
+        this.profileImageUrl = this.imageService.getDefaultAvatarPath();
+      });
     } else {
       // If we get here, all attempts failed, use the default avatar
       console.error('All attempts to load profile image failed, falling back to default');
