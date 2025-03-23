@@ -27,7 +27,41 @@ export class ApplicationService {
    * @returns Observable with the applications data
    */
   getApplicationsForOffer(offerId: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/applications/${offerId}`);
+    console.log(`Getting applications for offer ${offerId}`);
+    
+    // Based on the backend controller, the correct endpoint is:
+    // GET /applications/offers/{id}
+    return this.http.get(`${this.apiUrl}/applications/offers/${offerId}`).pipe(
+      map(response => {
+        console.log(`Response from /applications/offers/${offerId}:`, response);
+        return response;
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error(`Error getting applications for offer ${offerId}:`, error);
+        return of({ data: [] });
+      })
+    );
+  }
+
+  /**
+   * Get all applications for the current volunteer
+   * @returns Observable with the applications data
+   */
+  getMyApplications(): Observable<any> {
+    console.log('Getting all applications for current volunteer');
+    
+    // Based on the backend controller, the correct endpoint is:
+    // GET /applications/me
+    return this.http.get(`${this.apiUrl}/applications/me`).pipe(
+      map(response => {
+        console.log('Response from /applications/me:', response);
+        return response;
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error getting applications for current volunteer:', error);
+        return of({ data: [] });
+      })
+    );
   }
 
   /**
@@ -40,6 +74,7 @@ export class ApplicationService {
     console.log(`Sending application request for opportunity ID: ${offerId}`);
     
     // Make the API call directly and handle errors
+    // POST /applications/{id} is the correct endpoint
     return this.http.post(`${this.apiUrl}/applications/${offerId}`, {}).pipe(
       map(response => {
         console.log('Application API response:', response);
@@ -107,47 +142,7 @@ export class ApplicationService {
 
   /**
    * Directly check if a user has already applied to an opportunity
-   * @param offerId The ID of the opportunity
-   * @param volunteerId The ID of the volunteer
-   * @returns Observable with boolean indicating if the user has already applied
-   */
-  hasVolunteerApplied(offerId: number, volunteerId: number): Observable<boolean> {
-    if (!offerId || !volunteerId) {
-      return of(false);
-    }
-    
-    console.log(`Checking if volunteer ${volunteerId} has applied to opportunity ${offerId}`);
-    
-    return this.getApplicationsForOffer(offerId).pipe(
-      map(response => {
-        if (!response || !response.data) {
-          return false;
-        }
-        
-        const applications = response.data;
-        const hasApplied = applications.some((app: Application) => 
-          app.volunteer && app.volunteer.id === volunteerId
-        );
-        
-        console.log(`Volunteer ${volunteerId} has${hasApplied ? '' : ' not'} applied to opportunity ${offerId}`);
-        
-        return hasApplied;
-      }),
-      catchError(error => {
-        console.error(`Error checking if volunteer ${volunteerId} has applied to opportunity ${offerId}:`, error);
-        return of(false);
-      })
-    );
-  }
-
-  /**
-   * Check directly with the server if a user has already applied to an opportunity
-   * This makes a HEAD request to the application endpoint, which should return 403 if the user has already applied
-   * 
-   * NOTE: This requires a corresponding backend endpoint at /applications/{offerId}/check
-   * that returns:
-   * - 200 OK if the user has not applied
-   * - 403 Forbidden if the user has already applied
+   * This uses the dedicated endpoint that returns 403 if user has applied
    * 
    * @param offerId The ID of the opportunity
    * @returns Observable with boolean indicating if the user has already applied
@@ -159,7 +154,9 @@ export class ApplicationService {
     
     console.log(`Directly checking application status for opportunity ${offerId}`);
     
-    return this.http.head(`${this.apiUrl}/applications/${offerId}/check`, { observe: 'response' })
+    // Using the correct endpoint: GET /applications/{id}/check
+    // This returns 403 if user has applied, 200 if not
+    return this.http.get(`${this.apiUrl}/applications/${offerId}/check`, { observe: 'response' })
       .pipe(
         map(response => {
           // If the request succeeds with 200 OK, the user has not applied
@@ -171,6 +168,7 @@ export class ApplicationService {
           
           // If the server returns 403 Forbidden, the user has already applied
           if (error.status === 403) {
+            console.log(`User has already applied to opportunity ${offerId}`);
             return of(true);
           }
           
@@ -178,5 +176,36 @@ export class ApplicationService {
           return of(false);
         })
       );
+  }
+
+  /**
+   * Cancel an application made by the volunteer
+   * @param applicationId The ID of the application to cancel
+   * @returns Observable with the response of the delete operation
+   */
+  cancelApplication(applicationId: number): Observable<any> {
+    console.log(`Canceling application with ID: ${applicationId}`);
+    
+    return this.http.delete(`${this.apiUrl}/applications/${applicationId}`, { 
+      observe: 'response',
+      responseType: 'text' // Specify response type as text since it's a void API
+    })
+    .pipe(
+      map(response => {
+        console.log('Cancel application response:', response);
+        return response;
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error canceling application:', error);
+        
+        // If we get a 200 or 204 status with an error, it's actually a success
+        if (error.status === 200 || error.status === 204) {
+          console.log('Application successfully canceled despite error response');
+          return of({ status: 'success' });
+        }
+        
+        return throwError(() => error);
+      })
+    );
   }
 } 

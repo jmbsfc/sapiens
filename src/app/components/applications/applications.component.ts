@@ -56,11 +56,11 @@ export class ApplicationsComponent implements OnInit {
    * @returns The URL to the volunteer's profile image
    */
   getVolunteerImageUrl(volunteer: any): string {
-    if (!volunteer) {
+    if (!volunteer || !volunteer.user.profilePicture) {
       return this.imageService.getDefaultAvatarPath();
     }
     
-    return this.imageService.getProfileImageUrl(volunteer.imageUrl);
+    return this.imageService.getProfileImageUrl(volunteer.user.profilePicture);
   }
 
   /**

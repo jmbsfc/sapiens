@@ -178,30 +178,14 @@ export class CardComponent implements OnInit {
   loadImages() {
     // Load opportunity image if available
     if (this.cardData.imageUrl) {
-      this.imageService.validateImageUrl(this.cardData.imageUrl).subscribe(
-        (validatedUrl) => {
-          this.opportunityImageUrl = validatedUrl;
-          console.log('Opportunity image URL set to:', this.opportunityImageUrl);
-        },
-        (error) => {
-          console.error('Error validating opportunity image URL:', error);
-          this.opportunityImageUrl = 'cardplaceholder.png';
-        }
-      );
+      this.opportunityImageUrl = this.imageService.getImageUrl(this.cardData.imageUrl);
+      console.log('Opportunity image URL set to:', this.opportunityImageUrl);
     }
     
     // Load organization logo if available
     if (this.cardData.organization && this.cardData.organization.imageUrl) {
-      this.imageService.validateImageUrl(this.cardData.organization.imageUrl).subscribe(
-        (validatedUrl) => {
-          this.organizationLogoUrl = validatedUrl;
-          console.log('Organization logo URL set to:', this.organizationLogoUrl);
-        },
-        (error) => {
-          console.error('Error validating organization logo URL:', error);
-          this.organizationLogoUrl = 'assets/images/default-organization.svg';
-        }
-      );
+      this.organizationLogoUrl = this.imageService.getImageUrl(this.cardData.organization.imageUrl);
+      console.log('Organization logo URL set to:', this.organizationLogoUrl);
     }
   }
 
@@ -220,232 +204,79 @@ export class CardComponent implements OnInit {
         console.log('Applications response:', response);
         if (response && response.data) {
           this.applications = response.data;
-          
-          // Check if the current user has already applied
-          if (this.profileInfo && this.profileInfo.id) {
-            // Use the hasUserApplied method to check if the user has already applied
-            const userHasApplied = this.applicationService.hasUserApplied(
-              this.cardData.id, 
-              this.profileInfo.id, 
-              this.applications
-            );
-            
-            console.log('User has applied (from loadApplications):', userHasApplied);
-            
-            // Only update if the user has applied (to avoid overriding a true value with a false one)
-            if (userHasApplied) {
-              this.hasApplied = true;
-              console.log('Updated hasApplied flag to true based on applications list');
-            }
-            
-            // Also perform a direct check to ensure consistency
-            this.checkExistingApplication();
-          }
+          // Check application status using the new endpoint
+          this.checkExistingApplication();
         } else {
           this.applications = [];
-          // Don't reset hasApplied here, as it might override a true value
         }
       },
       error: (error) => {
         console.error('Error loading applications:', error);
         this.applications = [];
-        // Don't reset hasApplied here, as it might override a true value
       }
     });
   }
 
   /**
-   * Apply for the current opportunity
+   * Apply for the opportunity
    */
   applyForOpportunity() {
-    if (this.isApplying) {
-      return; // Prevent multiple submissions
-    }
-    
-    // Check if user is logged in
-    if (!this.profileInfo || !this.profileInfo.id) {
-      this.applicationError = 'Precisa de iniciar sessão para se candidatar.';
+    if (!this.cardData || !this.cardData.id) {
+      console.warn('No opportunity ID available for application');
       return;
     }
-    
-    // Check if user has already applied (client-side check)
-    if (this.hasApplied) {
-      this.applicationError = 'Já se candidatou a esta oportunidade. Cada voluntário pode candidatar-se apenas uma vez.';
-      return;
-    }
-    
+
     this.isApplying = true;
     this.applicationError = null;
-    
-    console.log('Applying for opportunity:', this.cardData.id, 'User ID:', this.profileInfo.id);
-    
-    // First, use the direct server check method (most reliable)
-    this.applicationService.checkDirectApplicationStatus(this.cardData.id).subscribe({
-      next: (hasApplied) => {
-        if (hasApplied) {
-          this.isApplying = false;
-          this.hasApplied = true;
-          this.applicationError = 'Já se candidatou a esta oportunidade. Cada voluntário pode candidatar-se apenas uma vez.';
-          
-          // Update the applications list to reflect the current state
-          this.loadApplications();
-          return;
-        }
-        
-        // If not applied according to direct check, try the second method
-        this.checkWithSecondMethod();
-      },
-      error: (error) => {
-        console.error('Error with direct server check:', error);
-        // If error, try the second method
-        this.checkWithSecondMethod();
-      }
-    });
+
+    // Submit the application
+    this.submitApplication();
   }
-  
-  /**
-   * Second method to check if the user has already applied
-   */
-  private checkWithSecondMethod() {
-    // Double-check for existing applications before submitting
-    this.applicationService.hasVolunteerApplied(this.cardData.id, this.profileInfo.id).subscribe({
-      next: (hasApplied) => {
-        if (hasApplied) {
-          this.isApplying = false;
-          this.hasApplied = true;
-          this.applicationError = 'Já se candidatou a esta oportunidade. Cada voluntário pode candidatar-se apenas uma vez.';
-          
-          // Update the applications list to reflect the current state
-          this.loadApplications();
-          return;
-        }
-        
-        // If not applied, proceed with application
-        this.submitApplication();
-      },
-      error: (error) => {
-        console.error('Error checking existing applications:', error);
-        // If error, proceed with application anyway, but be cautious
-        this.submitApplication();
-      }
-    });
-  }
-  
+
   /**
    * Submit the application to the server
    */
   private submitApplication() {
     this.applicationService.applyToOffer(this.cardData.id).subscribe({
       next: (response) => {
-        console.log('Application response:', response);
+        console.log('Application submitted successfully:', response);
+        this.hasApplied = true;
         this.isApplying = false;
-        
-        if (response && response.data) {
-          // Application successful
-          this.hasApplied = true;
-          
-          // Refresh the applications list
-          this.loadApplications();
-          
-          alert('Candidatura submetida com sucesso!');
-          this.closeModal();
-        } else {
-          // Application failed
-          this.applicationError = 'Não foi possível submeter a candidatura. Tente novamente.';
-        }
+        // Reload applications to get the updated list
+        this.loadApplications();
       },
       error: (error) => {
-        console.error('Error applying for opportunity:', error);
+        console.error('Error submitting application:', error);
+        this.applicationError = error.message || 'Erro ao enviar candidatura. Tente novamente mais tarde.';
         this.isApplying = false;
-        
-        if (error.message && error.message.includes('Já se candidatou')) {
-          this.hasApplied = true;
-          this.applicationError = 'Já se candidatou a esta oportunidade. Cada voluntário pode candidatar-se apenas uma vez.';
-          
-          // Refresh the applications list
-          this.loadApplications();
-        } else if (error.status === 403) {
-          // 403 Forbidden - User has already applied
-          this.hasApplied = true;
-          this.applicationError = 'Já se candidatou a esta oportunidade. Cada voluntário pode candidatar-se apenas uma vez.';
-          
-          // Refresh the applications list
-          this.loadApplications();
-        } else {
-          this.applicationError = 'Erro ao submeter candidatura. Tente novamente mais tarde.';
-        }
       }
     });
   }
 
   /**
-   * Check if the current user has already applied to this opportunity
+   * Check if the user has already applied to this opportunity
    */
   checkExistingApplication() {
-    if (!this.cardData || !this.cardData.id || !this.profileInfo || !this.profileInfo.id) {
+    if (!this.cardData || !this.cardData.id) {
+      console.warn('No opportunity ID available to check application status');
       return;
     }
     
-    console.log('Checking existing application for opportunity:', this.cardData.id, 'User ID:', this.profileInfo.id);
+    if (this.isOrgAccount) {
+      console.log('Organization account - skipping application check');
+      return;
+    }
     
-    // Method 1: Use the direct server check method (most reliable)
+    console.log('Checking application status for opportunity:', this.cardData.id);
+    
+    // Use the direct check endpoint
     this.applicationService.checkDirectApplicationStatus(this.cardData.id).subscribe({
       next: (hasApplied) => {
-        console.log('Direct server check result:', hasApplied);
-        
-        // Only update if the user has applied (to avoid overriding a true value with a false one)
-        if (hasApplied) {
-          this.hasApplied = true;
-          console.log('Updated hasApplied flag to true based on direct server check');
-        }
+        console.log('Application status result:', hasApplied);
+        this.hasApplied = hasApplied;
       },
       error: (error) => {
-        console.error('Error with direct server check:', error);
-      }
-    });
-    
-    // Method 2: Use the volunteer applied check method
-    this.applicationService.hasVolunteerApplied(this.cardData.id, this.profileInfo.id).subscribe({
-      next: (hasApplied) => {
-        console.log('Volunteer applied check result:', hasApplied);
-        
-        // Only update if the user has applied (to avoid overriding a true value with a false one)
-        if (hasApplied) {
-          this.hasApplied = true;
-          console.log('Updated hasApplied flag to true based on volunteer check');
-        }
-      },
-      error: (error) => {
-        console.error('Error checking existing application:', error);
-      }
-    });
-    
-    // Method 3: Also check the applications list directly
-    this.applicationService.getApplicationsForOffer(this.cardData.id).subscribe({
-      next: (response) => {
-        if (response && response.data) {
-          const applications = response.data;
-          const hasApplied = applications.some((app: any) => 
-            app.volunteer && app.volunteer.id === this.profileInfo.id
-          );
-          
-          console.log('Application list check result:', {
-            hasApplied,
-            applications: applications.length,
-            userApplications: applications.filter((app: any) => 
-              app.volunteer && app.volunteer.id === this.profileInfo.id
-            ).length
-          });
-          
-          // Only update if the user has applied (to avoid overriding a true value with a false one)
-          if (hasApplied) {
-            this.hasApplied = true;
-            console.log('Updated hasApplied flag to true based on applications list check');
-          }
-        }
-      },
-      error: (error) => {
-        console.error('Error checking applications list:', error);
+        console.error('Error checking application status:', error);
       }
     });
   }

@@ -61,6 +61,35 @@ export class LoginComponent implements OnInit {
     return re.test(email);
   }
 
+  onForgotPassword() {
+    // Reset error message
+    this.errorMessage = '';
+    
+    // Validate email
+    if (!this.email) {
+      this.formErrors.email = 'Por favor, introduza o seu email para redefinir a password.';
+      return;
+    } else if (!this.validateEmail(this.email)) {
+      this.formErrors.email = 'Por favor, introduza um email válido.';
+      return;
+    }
+    
+    // Clear password field errors if any
+    this.formErrors.password = '';
+    
+    // Show success message for mock implementation
+    this.isSubmitting = true;
+    
+    // Simulate API call with timeout
+    setTimeout(() => {
+      this.isSubmitting = false;
+      alert(`Se uma conta com o email: ${this.email} existir, será enviado um email para redefinir a password.`);
+    }, 1500);
+    
+    // In a real implementation, you would call the auth service
+    // this.authService.requestPasswordReset(this.email);
+  }
+
   onLogin() {
     if (!this.validateForm()) {
       return;

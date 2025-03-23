@@ -2,7 +2,7 @@
     <!-- Loading indicator -->
     <div class="loading-indicator" *ngIf="isLoading">
         <div class="spinner"></div>
-        <p>Loading profile information...</p>
+        <p>A Carregar...</p>
     </div>
 
     <!-- Error message -->
@@ -17,14 +17,10 @@
             <div class="profile-picture">
                 <img [src]="profileImageUrl" 
                      alt="Profile Picture" 
-                     (error)="handleImageError()" 
-                     crossorigin="anonymous"
-                     [class.loading]="isLoading">
-                
-                <!-- Debug info for profile image -->
-                <div *ngIf="profileInfo?.imageUrl" class="image-debug" style="font-size: 10px; margin-top: 5px; color: #666;">
-                    <p>Image path: {{ profileInfo?.imageUrl }}</p>
-                    <p>Full URL: {{ profileImageUrl }}</p>
+                     [class.loading]="isLoading"
+                     *ngIf="profileImageUrl">
+                <div class="profile-picture-placeholder" *ngIf="!profileImageUrl">
+                    <i class="fas fa-user"></i>
                 </div>
             </div>
             <div class="profile-info">
@@ -71,78 +67,6 @@
             </div>
         </div>
 
-        <!-- Debug info - only visible during development -->
-        <div class="debug-info">
-            <h3>Debug Information</h3>
-            <p><strong>Is Organization Account:</strong> {{ isOrgAccount }}</p>
-            <p><strong>Account Type:</strong> {{ isOrgAccount ? 'Organization' : 'Volunteer' }}</p>
-            
-            <h4>Organization Indicators:</h4>
-            <p><strong>Has 'name' property:</strong> {{ profileInfo?.name ? 'Yes' : 'No' }}</p>
-            <p><strong>Name value:</strong> "{{ profileInfo?.name }}"</p>
-            <p><strong>User role:</strong> "{{ profileInfo?.user?.role || 'Not specified' }}"</p>
-            
-            <h4>Volunteer Indicators:</h4>
-            <p><strong>Has firstName:</strong> {{ profileInfo?.firstName ? 'Yes' : 'No' }}</p>
-            <p><strong>First Name value:</strong> "{{ profileInfo?.firstName }}"</p>
-            <p><strong>Has lastName:</strong> {{ profileInfo?.lastName ? 'Yes' : 'No' }}</p>
-            <p><strong>Last Name value:</strong> "{{ profileInfo?.lastName }}"</p>
-            
-            <h4>User Object:</h4>
-            <p><strong>User Object Present:</strong> {{ profileInfo?.user ? 'Yes' : 'No' }}</p>
-            <p *ngIf="profileInfo?.user"><strong>User First Name:</strong> "{{ profileInfo?.user?.firstName }}"</p>
-            <p *ngIf="profileInfo?.user"><strong>User Last Name:</strong> "{{ profileInfo?.user?.lastName }}"</p>
-            <p *ngIf="profileInfo?.user"><strong>User Email:</strong> "{{ profileInfo?.user?.email }}"</p>
-            
-            <h4>Other Data:</h4>
-            <p><strong>Image URL in Profile:</strong> "{{ profileInfo?.imageUrl }}"</p>
-            <p><strong>Resolved Profile Image URL:</strong> "{{ profileImageUrl }}"</p>
-            <p><strong>Birthday Raw Value:</strong> "{{ profileInfo?.birthday }}"</p>
-            <p><strong>Birthday Formatted:</strong> "{{ formatDate(profileInfo?.birthday) }}"</p>
-
-            <h4>Image Test:</h4>
-            <div style="display: flex; gap: 20px; margin-top: 10px;">
-                <div>
-                    <p><strong>Direct Image URL:</strong></p>
-                    <img *ngIf="profileInfo?.imageUrl" [src]="'http://localhost:8080' + profileInfo?.imageUrl" 
-                         alt="Direct Image" style="max-width: 100px; border: 1px solid #ccc;" 
-                         (error)="handleDirectImageError()">
-                    <p *ngIf="directImageError" style="color: red;">Failed to load direct image</p>
-                    <p style="font-size: 10px; word-break: break-all;">URL: http://localhost:8080{{ profileInfo?.imageUrl }}</p>
-                </div>
-                <div>
-                    <p><strong>Service Image URL:</strong></p>
-                    <img *ngIf="profileInfo?.imageUrl" [src]="profileImageUrl" 
-                         alt="Service Image" style="max-width: 100px; border: 1px solid #ccc;">
-                    <p style="font-size: 10px; word-break: break-all;">URL: {{ profileImageUrl }}</p>
-                </div>
-                <div>
-                    <p><strong>Default Avatar:</strong></p>
-                    <img src="assets/images/default-avatar.svg" alt="Default Avatar" style="max-width: 100px; border: 1px solid #ccc;">
-                </div>
-            </div>
-
-            <div style="margin-top: 10px;">
-                <p><strong>Test Specific Image URL:</strong></p>
-                <input type="text" [(ngModel)]="testImageUrl" placeholder="Enter image URL to test" style="width: 300px; padding: 5px;">
-                <button (click)="testSpecificImageUrl()" style="margin-left: 10px; padding: 5px 10px;">Test URL</button>
-                <div *ngIf="testImageResult" style="margin-top: 10px;">
-                    <p>Test Result: <span [style.color]="testImageSuccess ? 'green' : 'red'">{{ testImageResult }}</span></p>
-                    <img *ngIf="testImageSuccess" [src]="testImageUrl" alt="Test Image" style="max-width: 100px; border: 1px solid #ccc;">
-                </div>
-            </div>
-            
-            <div style="margin-top: 20px;">
-                <p><strong>Test All Image Formats:</strong></p>
-                <button (click)="testAllImageFormats()" style="padding: 5px 10px;">Test All Formats</button>
-                <p style="font-size: 12px; margin-top: 5px;">This will test all possible URL formats for your profile image and log the results to the console.</p>
-            </div>
-            
-            <hr>
-            <p><strong>Full Profile Info:</strong></p>
-            <pre>{{ profileInfo | json }}</pre>
-        </div>
-
         <!-- Volunteer Applications Section -->
         <div class="profile-section" *ngIf="!isOrgAccount">
             <h2 class="section-title">
@@ -162,9 +86,12 @@
                             <p><strong>Local:</strong> {{ application.offer.address }}</p>
                         </div>
                         <div class="application-actions">
-                            <a [routerLink]="['/oportunidades', application.offer.id]" class="application-action-btn">
+                            <!-- <a [routerLink]="['/oportunidades', application.offer.id]" class="application-action-btn">
                                 <i class="fas fa-eye"></i> Ver Oportunidade
-                            </a>
+                            </a> -->
+                            <button class="application-action-btn cancel" (click)="cancelApplication(application.id)">
+                                <i class="fas fa-times-circle"></i> Cancelar Candidatura
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -180,7 +107,7 @@
         <!-- Organization Opportunities Section -->
         <div class="profile-section" *ngIf="isOrgAccount">
             <h2 class="section-title">
-                <i class="fas fa-hands-helping"></i> Created Opportunities
+                <i class="fas fa-hands-helping"></i> Oportunidades Criadas
             </h2>
             
             <div class="volunteer-history" *ngIf="orgOpportunities.length > 0">
@@ -196,16 +123,19 @@
                             {{ item.description }}
                         </p>
                         <div class="history-details" *ngIf="item.expanded">
-                            <p><strong>Category:</strong> {{ item.category }}</p>
-                            <p><strong>Location:</strong> {{ item.municipality }}</p>
-                            <p><strong>Address:</strong> {{ item.address }}</p>
-                            <p><strong>Date:</strong> {{ formatDate(item.startDate) }} - {{ formatDate(item.endDate) }}</p>
-                            <p><strong>Participants:</strong> {{ item.participantsCount }}</p>
+                            <p><strong>Categoria:</strong> {{ item.category }}</p>
+                            <p><strong>Localização:</strong> {{ item.municipality }}</p>
+                            <p><strong>Endereço:</strong> {{ item.address }}</p>
+                            <p><strong>Data:</strong> {{ formatDate(item.startDate) }} - {{ formatDate(item.endDate) }}</p>
+                            <p><strong>Nº de Participantes:</strong> {{ item.participantsCount }}</p>
                         </div>
                         <div class="history-actions" *ngIf="item.expanded">
                             <a [routerLink]="['/oportunidades', item.id, 'candidaturas']" class="action-btn view-applications">
                                 <i class="fas fa-users"></i> Ver candidaturas
                             </a>
+                            <button class="action-btn delete-opportunity" (click)="deleteOpportunity(item.id)">
+                                <i class="fas fa-trash"></i> Eliminar oportunidade
+                            </button>
                         </div>
                     </div>
                 </div>

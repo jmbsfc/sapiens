@@ -60,26 +60,32 @@
         </div>
         
         <div class="modal-footer">
-            <div *ngIf="!isOrgAccount" class="application-section">
+            <div *ngIf="isOrgAccount && isMine" class="applications-info">
+                <i class="fas fa-users"></i> {{ applications.length }} candidaturas feitas para esta oportunidade
+            </div>
+            
+            <div *ngIf="!isOrgAccount" class="application-messages">
                 <div *ngIf="applicationError" class="application-error">
-                    {{ applicationError }}
+                    <i class="fas fa-exclamation-circle"></i> {{ applicationError }}
                 </div>
-                
-                <button *ngIf="!hasApplied" class="btn-apply" [disabled]="isApplying" (click)="applyForOpportunity()">
-                    <span *ngIf="!isApplying">Candidatar-me</span>
-                    <span *ngIf="isApplying">A processar...</span>
-                </button>
                 
                 <div *ngIf="hasApplied" class="application-success">
                     <i class="fas fa-check-circle"></i> Já se candidatou a esta oportunidade
                 </div>
             </div>
             
-            <div *ngIf="isOrgAccount && isMine" class="applications-info">
-                <p>{{ applications.length }} candidato(s) para esta oportunidade</p>
+            <div class="button-group">
+                <button *ngIf="!isOrgAccount && !hasApplied" class="btn-apply" [disabled]="isApplying" (click)="applyForOpportunity()">
+                    <i class="fas fa-check-circle" *ngIf="!isApplying"></i>
+                    <i class="fas fa-spinner fa-spin" *ngIf="isApplying"></i>
+                    <span *ngIf="!isApplying">Candidatar-me</span>
+                    <span *ngIf="isApplying">A processar...</span>
+                </button>
+                
+                <button class="btn-close" (click)="closeModal()">
+                    <i class="fas fa-times"></i> Fechar
+                </button>
             </div>
-            
-            <button class="btn-close" (click)="closeModal()">Fechar</button>
         </div>
     </div>
 </div>

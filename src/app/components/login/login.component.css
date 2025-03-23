@@ -168,6 +168,22 @@
     text-decoration: underline;
   }
   
+  .forgot-password {
+    text-align: right;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+  }
+  
+  .forgot-password a {
+    color: #64cbfd;
+    text-decoration: none;
+  }
+  
+  .forgot-password a:hover {
+    text-decoration: underline;
+    color: #007979;
+  }
+  
   @media (max-width: 1200px) {
     .error-message-container {
       right: -280px;

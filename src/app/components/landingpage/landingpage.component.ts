@@ -16,6 +16,13 @@ export class LandingpageComponent implements OnInit {
     this.checkVisibility();
   }
 
+  scrollToSection(sectionId: string) {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
   checkVisibility() {
     const elements = document.querySelectorAll('.container-tutorial, .container-about');
     elements.forEach((element: any) => {

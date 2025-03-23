@@ -117,7 +117,7 @@
 
 .history-item {
     background: white;
-    border-radius: 8px;
+    border-radius: 16px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-bottom: 1rem;
     transition: all 0.3s ease;
@@ -213,6 +213,7 @@
     border-radius: 10px;
     text-decoration: none;
     font-weight: 500;
+    font-size: 14px;
     transition: all 0.2s ease;
 }
 
@@ -225,6 +226,20 @@
     background-color: #006666;
     transform: translateY(-2px);
     box-shadow: 0 4px 6px rgba(0, 121, 121, 0.2);
+}
+
+.action-btn.delete-opportunity {
+    background-color: #dc3545;
+    color: white;
+    margin-left: 10px;
+    cursor: pointer;
+    border: none;
+}
+
+.action-btn.delete-opportunity:hover {
+    background-color: #bd2130;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(221, 53, 69, 0.2);
 }
 
 .history-expand {
@@ -510,27 +525,36 @@
 }
 
 .application-action-btn {
-    padding: 8px 15px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    background-color: transparent;
-    color: #007979;
-    border: 1px solid #007979;
-    cursor: pointer;
-    transition: all 0.3s;
-    text-decoration: none;
     display: inline-flex;
     align-items: center;
-}
-
-.application-action-btn:hover {
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    margin-left: 10px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
     background-color: #007979;
     color: white;
 }
 
-.application-action-btn i {
-    margin-right: 5px;
+.application-action-btn:hover {
+    background-color: #006666;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 121, 121, 0.2);
+}
+
+.application-action-btn.cancel {
+    background-color: #dc3545;
+    color: white;
+}
+
+.application-action-btn.cancel:hover {
+    background-color: #bd2130;
+    box-shadow: 0 4px 6px rgba(221, 53, 69, 0.2);
 }
 
 .explore-btn {
@@ -541,6 +565,7 @@
     border-radius: 8px;
     text-decoration: none;
     font-weight: 500;
+    font-size: 14px;
     margin-top: 15px;
     transition: all 0.3s;
     box-shadow: 0 4px 6px rgba(0, 121, 121, 0.2);

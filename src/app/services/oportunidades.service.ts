@@ -25,32 +25,6 @@ export class OportunidadesService {
       );
   }
 
-  public getFilteredOpportunities(categoryId?: string, municipalityId?: string): Observable<any> {
-    let url = `${this.apiUrl}/offers`;
-    
-    // Start with base parameters
-    const params: string[] = [];
-    
-    if (categoryId) {
-      params.push(`categoryId=${categoryId}`);
-    }
-    
-    if (municipalityId) {
-      params.push(`municipalityId=${municipalityId}`);
-    }
-    
-    // Add parameters to URL if any exist
-    if (params.length > 0) {
-      url += `?${params.join('&')}`;
-    }
-    
-    console.log('Filtering with URL:', url);
-    return this.http.get<{data: any}>(url)
-      .pipe(
-        tap(response => console.log('Filtered opportunities response:', response))
-      );
-  }
-
   public getMunicipalities(): Observable<{data:any}> {
     return this.http.get<{data: any}>(`${this.apiUrl}/municipalities`)
       .pipe(
@@ -76,6 +50,13 @@ export class OportunidadesService {
     return this.http.get<{data: any}>(`${this.apiUrl}/offers?organizationId=${orgId}`)
       .pipe(
         tap(response => console.log('Organization opportunities response:', response))
+      );
+  }
+
+  public deleteOpportunity(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/offers/${id}`, { observe: 'response' })
+      .pipe(
+        tap(response => console.log('Delete opportunity response:', response))
       );
   }
 }

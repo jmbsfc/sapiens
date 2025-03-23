@@ -12,6 +12,10 @@
                 <input type="password" id="password" [(ngModel)]="password" name="password" placeholder="Password" required [ngClass]="{'input-error': formErrors.password}">
                 <div class="field-error" *ngIf="formErrors.password">{{ formErrors.password }}</div>
 
+                <div class="forgot-password">
+                    <a href="javascript:void(0)" (click)="onForgotPassword()">Esqueceu-se da password?</a>
+                </div>
+
                 <button type="submit" [disabled]="isSubmitting">
                     <span *ngIf="!isSubmitting">Login</span>
                     <span *ngIf="isSubmitting">Processando...</span>

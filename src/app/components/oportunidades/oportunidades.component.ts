@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CardComponent } from '../card/card.component';
 import { OportunidadesService } from '../../services/oportunidades.service';
 import { AuthService } from '../../services/auth.service';
 import { NgFor, NgIf } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { VolunteerService } from '../../services/volunteer.service';
 import { OrganizationService } from '../../services/organization.service';
 import { DatePipe } from '@angular/common';
@@ -16,8 +16,10 @@ import { DatePipe } from '@angular/common';
   providers: [DatePipe]
 })
 export class OportunidadesComponent implements OnInit {
+  @ViewChild('opportunityForm') opportunityForm!: NgForm;
+  
   data: any;
-  originalData: any; // Store the original unfiltered data
+  originalData: any = []; // Store the original unfiltered data
   municipalitiesData: any = [];
   selectedMunicipality: any = '';
   categoriesData: any = [];
@@ -29,12 +31,41 @@ export class OportunidadesComponent implements OnInit {
     description: '',
     categoryId: '',
     municipalityId: '',
-    startDate: null,
-    endDate: null
+    startDate: '',
+    endDate: ''
   };
   profileInfo: any = {};
   isOrgAccount = false;
   isLoading = false;
+  formSubmitted = false;
+
+  // Validation messages
+  validationMessages = {
+    title: {
+      required: 'O título é obrigatório.',
+      minlength: 'O título deve ter pelo menos 5 caracteres.'
+    },
+    category: {
+      required: 'A categoria é obrigatória.'
+    },
+    municipality: {
+      required: 'O município é obrigatório.'
+    },
+    address: {
+      required: 'O endereço é obrigatório.',
+      minlength: 'O endereço deve ter pelo menos 5 caracteres.'
+    },
+    description: {
+      required: 'A descrição é obrigatória.',
+      minlength: 'A descrição deve ter pelo menos 20 caracteres.'
+    },
+    startDate: {
+      required: 'A data de início é obrigatória.'
+    },
+    endDate: {
+      required: 'A data de término é obrigatória.'
+    }
+  };
 
   constructor(
     private oportunidadesService: OportunidadesService,
@@ -108,15 +139,12 @@ export class OportunidadesComponent implements OnInit {
     );
     
     // Call the service with the selected filters
-    this.oportunidadesService.getFilteredOpportunities(
-      this.selectedCategory || undefined, 
-      this.selectedMunicipality || undefined
-    ).subscribe(
+    this.oportunidadesService.getOportunities()
+    .subscribe(
       (response) => {
-        console.log('API Response:', response);
         if (response && response.data) {
-          console.log('Filtered opportunities data:', response.data);
           this.data = response.data;
+          this.clientSideFiltering(response.data);
         } else {
           console.warn('Response or response.data is undefined, using empty array');
           this.data = [];
@@ -127,23 +155,23 @@ export class OportunidadesComponent implements OnInit {
         console.error('Error filtering opportunities:', error);
         this.isLoading = false;
         // Fallback to client-side filtering if API filtering fails
-        this.clientSideFiltering();
+        this.clientSideFiltering(this.originalData);
       }
     );
   }
 
-  clientSideFiltering() {
+  clientSideFiltering(originalData: any) {
     console.log('Falling back to client-side filtering');
-    let filteredData = [...this.originalData];
+    let filteredData = [...originalData];
     
     if (this.selectedCategory && this.selectedCategory !== '') {
       console.log('Filtering by category:', this.selectedCategory);
-      filteredData = filteredData.filter(item => item.category && item.category.id === this.selectedCategory);
+      filteredData = filteredData.filter(item => item.category && item.category.id == this.selectedCategory);
     }
     
     if (this.selectedMunicipality && this.selectedMunicipality !== '') {
       console.log('Filtering by municipality:', this.selectedMunicipality);
-      filteredData = filteredData.filter(item => item.municipality && item.municipality.id === this.selectedMunicipality);
+      filteredData = filteredData.filter(item => item.municipality && item.municipality.id == this.selectedMunicipality);
     }
     
     console.log('Client-side filtered data:', filteredData);
@@ -156,23 +184,88 @@ export class OportunidadesComponent implements OnInit {
 
   closeModal() {
     this.isModalOpen = false;
+    this.resetForm();
   }
 
   onCreateOpportunity() {
-    this.newOpportunity.startDate = this.datePipe.transform(this.newOpportunity.startDate, 'dd-MM-yyyy');
-    this.newOpportunity.endDate = this.datePipe.transform(this.newOpportunity.endDate, 'dd-MM-yyyy');
-    console.log('Creating opportunity:', this.newOpportunity);
-    this.oportunidadesService.createOpportunity(this.newOpportunity).subscribe(
+    this.formSubmitted = true;
+
+    if (this.opportunityForm.invalid) {
+      console.log('Form is invalid:', this.opportunityForm.errors);
+      return;
+    }
+
+    // Validate dates
+    const startDate = new Date(this.newOpportunity.startDate);
+    const endDate = new Date(this.newOpportunity.endDate);
+    const today = new Date();
+
+    if (startDate < today) {
+      console.error('A data de início não pode ser anterior à data atual');
+      return;
+    }
+
+    if (endDate <= startDate) {
+      console.error('A data de término deve ser posterior à data de início');
+      return;
+    }
+
+    const formattedStartDate = this.datePipe.transform(startDate, 'dd-MM-yyyy') || '';
+    const formattedEndDate = this.datePipe.transform(endDate, 'dd-MM-yyyy') || '';
+    
+    const opportunityData = {
+      ...this.newOpportunity,
+      startDate: formattedStartDate,
+      endDate: formattedEndDate
+    };
+    
+    console.log('Creating opportunity:', opportunityData);
+    this.oportunidadesService.createOpportunity(opportunityData).subscribe(
       (response) => {
         console.log('Opportunity created', response);
+        this.resetForm();
         this.closeModal();
-        // Reload opportunities after creating a new one
         this.loadOpportunities();
       },
       (error) => {
-        console.log('Error', error);
+        console.error('Error creating opportunity:', error);
       }
     );
-    this.closeModal();
+  }
+
+  resetForm() {
+    this.formSubmitted = false;
+    this.newOpportunity = {
+      title: '',
+      address: '',
+      description: '',
+      categoryId: '',
+      municipalityId: '',
+      startDate: '',
+      endDate: ''
+    };
+    if (this.opportunityForm) {
+      this.opportunityForm.resetForm();
+    }
+  }
+
+  // Helper method to check if a field has errors
+  hasError(field: string): boolean {
+    const control = this.opportunityForm?.form.get(field);
+    return this.formSubmitted && control ? (control.invalid && (control.dirty || control.touched)) : false;
+  }
+
+  // Helper method to get error message
+  getErrorMessage(field: string): string {
+    const control = this.opportunityForm?.form.get(field);
+    if (control && control.errors) {
+      const messages = this.validationMessages[field as keyof typeof this.validationMessages];
+      for (const key in control.errors) {
+        if (messages[key as keyof typeof messages]) {
+          return messages[key as keyof typeof messages];
+        }
+      }
+    }
+    return '';
   }
 }

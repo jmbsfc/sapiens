@@ -25,7 +25,7 @@
                     <div class="field-error" *ngIf="formErrors.name">{{ formErrors.name }}</div>
 
                     <label for="website">Website:</label>
-                    <input type="text" id="website" name="website" placeholder="Ex: www.organizacao.pt" [(ngModel)]="formData.website" [ngClass]="{'input-error': formErrors.website}">
+                    <input type="text" id="website" name="website" placeholder="Ex: https://www.organizacao.pt" [(ngModel)]="formData.website" [ngClass]="{'input-error': formErrors.website}">
                     <div class="field-error" *ngIf="formErrors.website">{{ formErrors.website }}</div>
 
                     <label for="phone">Telefone:</label>

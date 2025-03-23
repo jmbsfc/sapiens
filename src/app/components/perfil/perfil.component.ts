@@ -8,6 +8,7 @@ import { NgClass, NgFor, NgIf, DatePipe, JsonPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApplicationService } from '../../services/application.service';
 import { RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-perfil',
@@ -24,15 +25,9 @@ export class PerfilComponent implements OnInit {
   volunteerHistory: any[] = [];
   isLoading = true;
   error: string | null = null;
-  profileImageUrl: string = 'assets/images/default-avatar.svg';
-  directImageError: boolean = false;
-  
-  // Image URL test properties
-  testImageUrl: string = '';
-  testImageResult: string | null = null;
-  testImageSuccess: boolean = false;
-
+  profileImageUrl: string = '';
   volunteerApplications: any[] = [];
+  private apiUrl: string = 'http://localhost:8080';
 
   constructor(
     private volunteerService: VolunteerService,
@@ -41,101 +36,35 @@ export class PerfilComponent implements OnInit {
     private authService: AuthService,
     private imageService: ImageService,
     private datePipe: DatePipe,
-    private applicationService: ApplicationService
+    private applicationService: ApplicationService,
+    private http: HttpClient
   ) {}
 
   ngOnInit() {
-    // Check account type from auth service first
     this.isOrgAccount = this.authService.isOrgAccount();
-    console.log('Initial account type from auth service:', this.isOrgAccount);
-    
-    // Test the image server
-    this.testImageServer();
-    
     this.loadProfileData();
-  }
-
-  /**
-   * Tests if the image server is working correctly
-   */
-  testImageServer() {
-    // Test with the profile image URL if available
-    if (this.profileInfo && this.profileInfo.imageUrl) {
-      const testUrl = `${this.imageService['apiUrl']}${this.profileInfo.imageUrl}`;
-      console.log('Testing image server with profile image URL:', testUrl);
-      
-      fetch(testUrl)
-        .then(response => {
-          console.log('Image server test response:', response.status, response.ok);
-          if (!response.ok) {
-            console.warn('Image server test failed, server might not be serving images correctly');
-          } else {
-            console.log('Image server test successful');
-          }
-        })
-        .catch(error => {
-          console.error('Error testing image server:', error);
-        });
-    } else {
-      // Fallback to testing with default avatar if no profile image
-      const testUrl = `${this.imageService['apiUrl']}/images/default-avatar.svg`;
-      console.log('Testing image server with default avatar:', testUrl);
-      
-      fetch(testUrl)
-        .then(response => {
-          console.log('Image server test response:', response.status, response.ok);
-          if (!response.ok) {
-            console.warn('Image server test failed, server might not be serving images correctly');
-          } else {
-            console.log('Image server test successful');
-          }
-        })
-        .catch(error => {
-          console.error('Error testing image server:', error);
-        });
-    }
   }
 
   loadProfileData() {
     this.isLoading = true;
     this.error = null;
+    console.log('Loading profile data...');
     
-    // Get profile data from the API
     this.volunteerService.getProfileInfo().subscribe(
       (response) => {
-        console.log('Profile API response:', response);
+        console.log('========== PROFILE API RESPONSE ==========');
+        console.log('Raw API Response:', response);
+        console.log('Response data type:', typeof response.data);
+        console.log('Response data JSON:', JSON.stringify(response.data, null, 2));
+        console.log('===========================================');
         
         if (response && response.data) {
           this.profileInfo = response.data;
+          console.log('+++++++++++++++++++++++++++++++++++++++Profile info imageUrl:', this.profileInfo.user.profilePicture);
           
-          // Log the profile data for debugging
-          console.log('Profile data loaded:', {
-            id: this.profileInfo.id,
-            imageUrl: this.profileInfo.imageUrl,
-            user: this.profileInfo.user,
-            name: this.profileInfo.name,
-            firstName: this.profileInfo.firstName,
-            lastName: this.profileInfo.lastName
-          });
-          
-          // Determine account type based on response data structure
+          // Process based on account type
           this.determineAccountType();
-          
-          // Process the profile data based on account type
-          if (this.isOrgAccount) {
-            console.log('Processing as organization profile');
-            this.processOrganizationProfile();
-          } else {
-            console.log('Processing as volunteer profile');
-            this.processVolunteerProfile();
-          }
-          
-          // Set the profile image URL after processing
-          this.updateProfileImageUrl();
-          
-          this.isLoading = false;
         } else {
-          console.error('No data found in response:', response);
           this.handleProfileError();
         }
       },
@@ -145,30 +74,64 @@ export class PerfilComponent implements OnInit {
       }
     );
   }
-  
+
+  updateProfileImageUrl() {
+    console.log('Updating profile image URL from profileInfo:', this.profileInfo);
+    
+    // Check for imageUrl in the profileInfo data
+    if (this.profileInfo.user && this.profileInfo.user.profilePicture) {
+
+      // Make sure the path starts with a slash
+      let imageUrl = this.profileInfo.user.profilePicture;
+      if (!imageUrl.startsWith('/')) {
+        imageUrl = '/' + imageUrl;
+      }
+      
+      // Construct the full URL by adding the base API URL
+      this.profileImageUrl = `http://localhost:8080${imageUrl}`;
+    } 
+    // If no image is found, use default
+    else {
+      console.log('No image URL found in profile info, using default avatar');
+      this.profileImageUrl = 'assets/images/default-avatar.png';
+      console.log('Default avatar path:', this.profileImageUrl);
+    }
+  }
+
+  handleProfileError() {
+    this.error = 'Failed to load profile information. Please try again later.';
+    this.isLoading = false;
+    this.profileImageUrl = ''; // Ensure no default avatar is set
+  }
+
   determineAccountType() {
     // First check if the auth service says it's an org account
-    const authServiceSaysOrg = this.authService.isOrgAccount();
+    this.isOrgAccount = this.authService.isOrgAccount();
     
-    // Then check the response data structure
-    const hasName = !!this.profileInfo.name;
-    const hasFirstLastName = !!this.profileInfo.firstName && !!this.profileInfo.lastName;
-    const userRole = this.profileInfo.user?.role || '';
-    const userRoleIsOrg = userRole.toUpperCase().includes('ORGANIZATION');
+    console.log('Account type from auth service:', this.isOrgAccount ? 'Organization' : 'Volunteer');
     
-    // Log all the factors
-    console.log('Account type determination factors:');
-    console.log('- Auth service says org:', authServiceSaysOrg);
-    console.log('- Has name property:', hasName);
-    console.log('- Has firstName and lastName:', hasFirstLastName);
-    console.log('- User role:', userRole);
-    console.log('- User role includes ORGANIZATION:', userRoleIsOrg);
+    // Additional check from the user data itself
+    if (this.profileInfo && this.profileInfo.user && this.profileInfo.user.role) {
+      // Role-based determination (if there's a user object with role)
+      if (this.profileInfo.user.role.includes('ORG')) {
+        this.isOrgAccount = true;
+        console.log('Account type determined from user role: Organization');
+      } else {
+        console.log('Account type determined from user role: Volunteer');
+      }
+    }
     
-    // Determine the account type based on all factors
-    // If the profile has a 'name' property or the user role contains 'ORGANIZATION', it's an org
-    this.isOrgAccount = hasName || userRoleIsOrg || authServiceSaysOrg;
+    console.log('Final account type:', this.isOrgAccount ? 'Organization' : 'Volunteer');
     
-    console.log('Final account type determination:', this.isOrgAccount ? 'Organization' : 'Volunteer');
+    // Process profile based on account type
+    if (this.isOrgAccount) {
+      this.processOrganizationProfile();
+    } else {
+      this.processVolunteerProfile();
+    }
+    
+    this.updateProfileImageUrl();
+    this.isLoading = false;
   }
   
   processOrganizationProfile() {
@@ -183,12 +146,6 @@ export class PerfilComponent implements OnInit {
     
     // Set profile image URL
     this.updateProfileImageUrl();
-    
-    // Test the specific image path if available
-    if (this.profileInfo.imageUrl) {
-      this.testProfileImagePath();
-      this.testAllImageFormats();
-    }
     
     // Load organization opportunities
     this.loadOrgOpportunities();
@@ -207,12 +164,6 @@ export class PerfilComponent implements OnInit {
     // Set profile image URL
     this.updateProfileImageUrl();
     
-    // Test the specific image path if available
-    if (this.profileInfo.imageUrl) {
-      this.testProfileImagePath();
-      this.testAllImageFormats();
-    }
-    
     if (!this.profileInfo.firstName || !this.profileInfo.lastName) {
       console.warn('Missing name data in profile:', this.profileInfo);
     }
@@ -222,117 +173,6 @@ export class PerfilComponent implements OnInit {
     
     // Load volunteer applications
     this.loadVolunteerApplications();
-  }
-
-  updateProfileImageUrl() {
-    if (this.profileInfo && this.profileInfo.imageUrl) {
-      console.log('Setting profile image URL from:', this.profileInfo.imageUrl);
-      
-      // Log the image URL structure
-      console.log('Image URL type:', typeof this.profileInfo.imageUrl);
-      console.log('Image URL value:', this.profileInfo.imageUrl);
-      
-      // Ensure the image URL starts with /images/
-      let imageUrl = this.profileInfo.imageUrl;
-      if (!imageUrl.startsWith('/images/')) {
-        imageUrl = '/images/' + imageUrl.replace(/^\/+/, '');
-        console.log('Normalized image URL:', imageUrl);
-      }
-      
-      // Use the image service to get the full URL
-      const fullImageUrl = this.imageService.getImageUrl(imageUrl);
-      console.log('Full image URL:', fullImageUrl);
-      
-      // Test if the image exists
-      this.checkImageExists(fullImageUrl).then(exists => {
-        if (exists) {
-          console.log('Image exists at URL:', fullImageUrl);
-          this.profileImageUrl = fullImageUrl;
-        } else {
-          console.warn('Image not found at URL:', fullImageUrl);
-          this.profileImageUrl = this.imageService.getDefaultAvatarPath();
-        }
-      }).catch(error => {
-        console.error('Error checking image existence:', error);
-        this.profileImageUrl = this.imageService.getDefaultAvatarPath();
-      });
-    } else {
-      console.log('No image URL found in profile, using default');
-      this.profileImageUrl = this.imageService.getDefaultAvatarPath();
-    }
-  }
-
-  /**
-   * Checks if an image exists at the given URL
-   * @param url The URL to check
-   * @returns A promise that resolves to true if the image exists, false otherwise
-   */
-  checkImageExists(url: string): Promise<boolean> {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => resolve(true);
-      img.onerror = () => resolve(false);
-      img.src = url;
-    });
-  }
-
-  handleImageError() {
-    console.error('Error loading profile image from URL:', this.profileImageUrl);
-    
-    // Try to validate the image URL
-    if (this.profileInfo && this.profileInfo.imageUrl) {
-      console.log('Attempting to validate image URL after error');
-      
-      // Use the image service to get a fresh URL
-      const freshUrl = this.imageService.getImageUrl(this.profileInfo.imageUrl);
-      console.log('Fresh image URL:', freshUrl);
-      
-      // Test if the image exists at the fresh URL
-      this.checkImageExists(freshUrl).then(exists => {
-        if (exists) {
-          console.log('Image exists at fresh URL, updating profile image');
-          this.profileImageUrl = freshUrl;
-        } else {
-          console.warn('Image not found at fresh URL, using default avatar');
-          this.profileImageUrl = this.imageService.getDefaultAvatarPath();
-        }
-      }).catch(error => {
-        console.error('Error checking image existence:', error);
-        this.profileImageUrl = this.imageService.getDefaultAvatarPath();
-      });
-    } else {
-      // If we get here, all attempts failed, use the default avatar
-      console.error('All attempts to load profile image failed, falling back to default');
-      this.profileImageUrl = this.imageService.getDefaultAvatarPath();
-    }
-  }
-
-  handleDirectImageError() {
-    console.error('Error loading direct image URL');
-    this.directImageError = true;
-  }
-
-  handleProfileError() {
-    this.error = 'Failed to load profile information. Please try again later.';
-    this.isLoading = false;
-    
-    // Provide fallback data for testing/development
-    console.log('Using fallback profile data for testing');
-    this.profileInfo = {
-      id: 1,
-      firstName: 'Test',
-      lastName: 'User',
-      email: 'test@example.com',
-      phoneNumber: '123-456-7890',
-      birthday: '01-01-1990',
-      imageUrl: null
-    };
-    
-    // Set default profile image
-    this.profileImageUrl = 'assets/images/default-avatar.svg';
-    
-    // Show a warning in the console that we're using fallback data
-    console.warn('Using fallback profile data because the API request failed');
   }
 
   loadVolunteerHistory() {
@@ -410,16 +250,19 @@ export class PerfilComponent implements OnInit {
             // For each opportunity, get the number of applications
             const opportunityPromises = filteredOpps.map((opp: any) => {
               return new Promise<any>((resolve) => {
+                // Get applications for this opportunity
                 this.applicationService.getApplicationsForOffer(opp.id).subscribe(
                   (appResponse) => {
-                    // Count all applications (not just accepted ones)
-                    const totalCount = appResponse?.data?.length || 0;
+                    let participantsCount = 0;
                     
-                    console.log(`Opportunity ${opp.id} has ${totalCount} total applications`);
+                    if (appResponse && appResponse.data && Array.isArray(appResponse.data)) {
+                      participantsCount = appResponse.data.length;
+                      console.log(`Opportunity ${opp.id} has ${participantsCount} applications from API`);
+                    }
                     
                     resolve({
                       ...opp,
-                      participantsCount: totalCount
+                      participantsCount: participantsCount
                     });
                   },
                   (error) => {
@@ -444,8 +287,8 @@ export class PerfilComponent implements OnInit {
                 address: opp.address,
                 category: opp.category ? opp.category.name : 'Uncategorized',
                 municipality: opp.municipality ? opp.municipality.name : 'Unknown Location',
-                participantsCount: opp.participantsCount,
-          expanded: false
+                participantsCount: opp.participantsCount || 0,
+                expanded: false
               }));
               
               console.log('Final opportunities with participant counts:', this.orgOpportunities);
@@ -530,216 +373,135 @@ export class PerfilComponent implements OnInit {
   }
 
   /**
-   * Tests a specific image URL
-   */
-  testSpecificImageUrl() {
-    if (!this.testImageUrl) {
-      this.testImageResult = 'Please enter a URL to test';
-      this.testImageSuccess = false;
-      return;
-    }
-
-    this.testImageResult = 'Testing...';
-    this.testImageSuccess = false;
-
-    this.checkImageExists(this.testImageUrl).then(exists => {
-      if (exists) {
-        this.testImageResult = 'Image loaded successfully!';
-        this.testImageSuccess = true;
-      } else {
-        this.testImageResult = 'Failed to load image from URL';
-        this.testImageSuccess = false;
-      }
-    });
-  }
-
-  /**
-   * Tests the specific image path from the profile
-   */
-  testProfileImagePath() {
-    if (!this.profileInfo.imageUrl) return;
-    
-    console.log('Testing profile image path:', this.profileInfo.imageUrl);
-    
-    // Test direct URL construction
-    const directUrl = `${this.imageService['apiUrl']}${this.profileInfo.imageUrl}`;
-    console.log('Testing direct URL:', directUrl);
-    
-    fetch(directUrl)
-      .then(response => {
-        console.log('Direct URL test response:', response.status, response.ok);
-        if (!response.ok) {
-          console.warn('Direct URL test failed, image might not exist at this path');
-        } else {
-          console.log('Direct URL test successful');
-        }
-      })
-      .catch(error => {
-        console.error('Error testing direct URL:', error);
-      });
-    
-    // Also test with the image service
-    const serviceUrl = this.imageService.getImageUrl(this.profileInfo.imageUrl);
-    console.log('Testing service URL:', serviceUrl);
-    
-    fetch(serviceUrl)
-      .then(response => {
-        console.log('Service URL test response:', response.status, response.ok);
-        if (!response.ok) {
-          console.warn('Service URL test failed, image service might not be constructing URLs correctly');
-        } else {
-          console.log('Service URL test successful');
-        }
-      })
-      .catch(error => {
-        console.error('Error testing service URL:', error);
-      });
-  }
-
-  /**
    * Load applications made by the volunteer
    */
   loadVolunteerApplications() {
     if (!this.profileInfo || !this.profileInfo.id) {
       console.warn('No volunteer ID available to load applications');
+      this.volunteerApplications = [];
+      this.isLoading = false;
       return;
     }
     
     console.log('Loading applications for volunteer ID:', this.profileInfo.id);
     
-    // Since the API doesn't provide a direct endpoint to get applications by volunteer ID,
-    // we'll need to get all opportunities and filter the ones the volunteer has applied to
-    this.oportunidadesService.getOportunities().subscribe(
+    // Use the dedicated endpoint for getting current volunteer's applications
+    this.applicationService.getMyApplications().subscribe(
       (response) => {
         if (response && response.data) {
-          const opportunities = response.data;
-          console.log('Found opportunities:', opportunities.length);
+          console.log('My applications response:', response);
           
-          // For each opportunity, check if the volunteer has applied
-          const applicationPromises = opportunities.map((opportunity: any) => {
-            console.log('Checking applications for opportunity:', opportunity.id, opportunity.title);
-            return new Promise<any[]>((resolve) => {
-              this.applicationService.getApplicationsForOffer(opportunity.id).subscribe(
-                (appResponse) => {
-                  if (appResponse && appResponse.data) {
-                    // Filter applications for this volunteer
-                    const volunteerApps = appResponse.data.filter((app: any) => {
-                      const isMatch = app.volunteer && app.volunteer.id === this.profileInfo.id;
-                      if (isMatch) {
-                        console.log('Found matching application:', {
-                          opportunityId: opportunity.id,
-                          opportunityTitle: opportunity.title,
-                          applicationId: app.id,
-                          status: app.status
-                        });
-                      }
-                      return isMatch;
-                    });
-                    
-                    // Add the opportunity data to each application
-                    volunteerApps.forEach((app: any) => {
-                      app.offer = opportunity;
-                    });
-                    
-                    resolve(volunteerApps);
-                  } else {
-                    console.log('No applications found for opportunity:', opportunity.id);
-                    resolve([]);
+          // Get the raw applications data
+          const myApplications = response.data;
+          
+          // If there are no applications, set empty array and return early
+          if (!myApplications || myApplications.length === 0) {
+            console.log('No applications found for this volunteer');
+            this.volunteerApplications = [];
+            this.isLoading = false;
+            return;
+          }
+          
+          // For each application, we need to get the offer details
+          const applicationPromises = myApplications.map((application: any) => {
+            return new Promise<any>((resolve) => {
+              // If the offer is already included in the application data, use it
+              if (application.offer) {
+                resolve(application);
+                return;
+              }
+              
+              // Otherwise, fetch the offer details
+              const offerId = application.offer?.id || application.offerId;
+              if (offerId) {
+                this.oportunidadesService.getOpportunity(offerId).subscribe(
+                  (offerResponse) => {
+                    if (offerResponse && offerResponse.data) {
+                      application.offer = offerResponse.data;
+                    }
+                    resolve(application);
+                  },
+                  (error) => {
+                    console.error(`Error loading offer ${offerId} for application:`, error);
+                    resolve(application);
                   }
-                },
-                (error) => {
-                  console.error(`Error loading applications for opportunity ${opportunity.id}:`, error);
-                  resolve([]);
-                }
-              );
+                );
+              } else {
+                console.warn('Application has no offer ID:', application);
+                resolve(application);
+              }
             });
           });
           
-          // Wait for all application requests to complete
-          Promise.all(applicationPromises).then(applicationsArrays => {
-            // Flatten the array of arrays into a single array
-            this.volunteerApplications = applicationsArrays.flat();
-            console.log('Final volunteer applications:', {
-              totalApplications: this.volunteerApplications.length,
-              applications: this.volunteerApplications.map(app => ({
-                id: app.id,
-                opportunityId: app.offer.id,
-                opportunityTitle: app.offer.title,
-                status: app.status
-              }))
-            });
+          // Wait for all applications to be processed
+          Promise.all(applicationPromises).then(applications => {
+            this.volunteerApplications = applications;
+            console.log('Final volunteer applications:', this.volunteerApplications);
+            this.isLoading = false;
           });
+        } else {
+          console.warn('No applications data found in response:', response);
+          this.volunteerApplications = [];
+          this.isLoading = false;
         }
       },
       (error) => {
-        console.error('Error loading opportunities for applications:', error);
+        console.error('Error loading volunteer applications:', error);
         this.volunteerApplications = [];
+        this.isLoading = false;
       }
     );
   }
 
   /**
-   * Tests all possible image URL formats for the profile image
+   * Delete an opportunity created by the organization
+   * @param id The ID of the opportunity to delete
    */
-  testAllImageFormats() {
-    if (!this.profileInfo || !this.profileInfo.imageUrl) {
-      console.warn('No image URL available to test');
-      return;
-    }
-    
-    const imageUrl = this.profileInfo.imageUrl;
-    console.log('Testing all possible formats for image URL:', imageUrl);
-    
-    // Format 1: Direct URL with API base
-    const format1 = `http://localhost:8080${imageUrl}`;
-    this.testImageFormat('Format 1 (Direct with API base)', format1);
-    
-    // Format 2: Using image service
-    const format2 = this.imageService.getImageUrl(imageUrl);
-    this.testImageFormat('Format 2 (Image Service)', format2);
-    
-    // Format 3: API base + /images/ + filename
-    let filename = imageUrl;
-    if (filename.startsWith('/')) {
-      filename = filename.substring(1);
-    }
-    if (filename.startsWith('images/')) {
-      filename = filename.substring(7);
-    }
-    const format3 = `http://localhost:8080/images/${filename}`;
-    this.testImageFormat('Format 3 (API base + /images/ + filename)', format3);
-    
-    // Format 4: API base + /images + path
-    let path = imageUrl;
-    if (!path.startsWith('/')) {
-      path = '/' + path;
-    }
-    if (!path.startsWith('/images/') && !path.startsWith('/images')) {
-      path = '/images' + path;
-    }
-    const format4 = `http://localhost:8080${path}`;
-    this.testImageFormat('Format 4 (API base + /images + path)', format4);
-  }
-  
-  /**
-   * Tests a specific image URL format
-   * @param label The label for the format
-   * @param url The URL to test
-   */
-  private testImageFormat(label: string, url: string) {
-    console.log(`Testing ${label}: ${url}`);
-    
-    fetch(url)
-      .then(response => {
-        console.log(`${label} result:`, response.status, response.ok);
-        if (response.ok) {
-          console.log(`✅ ${label} SUCCESS`);
-        } else {
-          console.warn(`❌ ${label} FAILED`);
+  deleteOpportunity(id: number) {
+    if (confirm('Tem a certeza que pretende eliminar esta oportunidade? Esta ação não pode ser desfeita.')) {
+      this.oportunidadesService.deleteOpportunity(id).subscribe(
+        (response) => {
+          console.log('Opportunity deleted successfully', response);
+          
+          // Remove from the local list to update the UI
+          this.orgOpportunities = this.orgOpportunities.filter(opp => opp.id !== id);
+        },
+        (error) => {
+          console.error('Error deleting opportunity:', error);
+          alert('Ocorreu um erro ao eliminar a oportunidade. Por favor, tente novamente.');
         }
-      })
-      .catch(error => {
-        console.error(`❌ ${label} ERROR:`, error);
-      });
+      );
+    }
+  }
+
+  /**
+   * Cancel an application made by the volunteer
+   * @param applicationId The ID of the application to cancel
+   */
+  cancelApplication(applicationId: number) {
+    if (confirm('Tem a certeza que pretende cancelar esta candidatura? Esta ação não pode ser desfeita.')) {
+      // Show loading state
+      this.isLoading = true;
+      
+      this.applicationService.cancelApplication(applicationId).subscribe(
+        (response) => {
+          console.log('Application canceled successfully', response);
+          
+          // Don't try to filter immediately - reload all applications from server
+          this.volunteerApplications = [];
+          
+          // Reload all applications to ensure the UI is synchronized with the server
+          setTimeout(() => {
+            this.loadVolunteerApplications();
+            this.isLoading = false;
+          }, 500); // Small delay to ensure server has processed the deletion
+        },
+        (error) => {
+          console.error('Error canceling application:', error);
+          this.isLoading = false;
+          alert('Ocorreu um erro ao cancelar a candidatura. Por favor, tente novamente.');
+        }
+      );
+    }
   }
 }

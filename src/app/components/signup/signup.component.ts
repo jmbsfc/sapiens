@@ -171,11 +171,11 @@ export class SignupComponent implements OnInit {
       console.log('Formatted birthdate for server:', formattedBirthdate);
       
       // If there's a profile picture, upload it first
-      if (this.formData.profilePicture && this.formData.profilePicture !== null) {
+      if (this.formData.profilePicture && this.formData.profilePicture instanceof File) {
         this.uploadProfilePicture();
       } else {
-        // Otherwise proceed with signup using default image
-        this.completeSignup("n", formattedBirthdate);
+        // Use the default image path which will be set in completeSignup
+        this.completeSignup("", formattedBirthdate);
       }
     } catch (error) {
       this.isSubmitting = false;
@@ -198,23 +198,31 @@ export class SignupComponent implements OnInit {
           // Complete signup with the image path
           this.completeSignup(imagePath, formattedBirthdate);
         } else {
-          // If image upload fails, use default image
-          console.warn('Image upload response missing data, using default image');
+          // If image upload fails, proceed without an image
+          console.warn('Image upload failed, proceeding without an image');
           const formattedBirthdate = this.formatDateForServer(this.formData.birthdate);
-          this.completeSignup("n", formattedBirthdate);
+          this.completeSignup("", formattedBirthdate);
         }
       },
       (error) => {
         console.error('Error uploading image:', error);
-        // If image upload fails, continue with signup using default image
+        // If image upload fails, continue with signup without an image
         const formattedBirthdate = this.formatDateForServer(this.formData.birthdate);
-        this.completeSignup("n", formattedBirthdate);
+        this.completeSignup("", formattedBirthdate);
       }
     );
   }
   
   completeSignup(imagePath: string, formattedBirthdate: string) {
     console.log('Completing signup with image path:', imagePath);
+    
+    // Use default avatar path if no image was uploaded
+    if (!imagePath || imagePath === '') {
+      // Use a server-side default image path
+      imagePath = '/images/default-avatar.jpg'; // This should exist on the server
+      console.log('Using default image path:', imagePath);
+    }
+    
     this.authService.signup({
       firstName: this.formData.firstname,
       lastName: this.formData.lastname,
