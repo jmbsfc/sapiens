@@ -1,21 +1,128 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { FormsModule } from '@angular/forms';
+import { NgIf, NgClass } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule],
+  standalone: true,
+  imports: [FormsModule, NgIf, NgClass],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   email = '';
   password = '';
+  errorMessage = '';
+  isSubmitting = false;
+  formErrors = {
+    email: '',
+    password: ''
+  };
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private router: Router) {}
+
+  ngOnInit() {
+    // Initialize component
+    console.log('Login component initialized');
+  }
+
+  validateForm(): boolean {
+    // Reset error messages
+    this.errorMessage = '';
+    this.formErrors = {
+      email: '',
+      password: ''
+    };
+    
+    let isValid = true;
+    
+    // Validate email
+    if (!this.email) {
+      this.formErrors.email = 'Email é obrigatório';
+      isValid = false;
+    } else if (!this.validateEmail(this.email)) {
+      this.formErrors.email = 'Email inválido';
+      isValid = false;
+    }
+    
+    // Validate password
+    if (!this.password) {
+      this.formErrors.password = 'Password é obrigatória';
+      isValid = false;
+    }
+    
+    return isValid;
+  }
+  
+  validateEmail(email: string): boolean {
+    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return re.test(email);
+  }
+
+  onForgotPassword() {
+    // Reset error message
+    this.errorMessage = '';
+    
+    // Validate email
+    if (!this.email) {
+      this.formErrors.email = 'Por favor, introduza o seu email para redefinir a password.';
+      return;
+    } else if (!this.validateEmail(this.email)) {
+      this.formErrors.email = 'Por favor, introduza um email válido.';
+      return;
+    }
+    
+    // Clear password field errors if any
+    this.formErrors.password = '';
+    
+    // Show success message for mock implementation
+    this.isSubmitting = true;
+    
+    // Simulate API call with timeout
+    setTimeout(() => {
+      this.isSubmitting = false;
+      alert(`Se uma conta com o email: ${this.email} existir, será enviado um email para redefinir a password.`);
+    }, 1500);
+    
+    // In a real implementation, you would call the auth service
+    // this.authService.requestPasswordReset(this.email);
+  }
 
   onLogin() {
-    console.log({email: this.email, password: this.password})
-    this.authService.login({ email: this.email, password: this.password})
+    if (!this.validateForm()) {
+      return;
+    }
+    
+    this.isSubmitting = true;
+    console.log({email: this.email, password: this.password});
+    
+    try {
+      this.authService.login(
+        { email: this.email, password: this.password },
+        // Success callback
+        () => {
+          this.isSubmitting = false;
+          this.router.navigate(['/']);
+        },
+        // Error callback
+        (error) => {
+          this.isSubmitting = false;
+          if (error.status === 401) {
+            this.errorMessage = 'Email ou password incorretos. Por favor, tente novamente.';
+          } else if (error.status === 404) {
+            this.errorMessage = 'Conta não encontrada. Verifique seu email ou crie uma nova conta.';
+          } else {
+            this.errorMessage = 'Ocorreu um erro ao fazer login. Por favor, tente novamente.';
+          }
+          console.error('Login error:', error);
+        }
+      );
+    } catch (error) {
+      this.isSubmitting = false;
+      this.errorMessage = 'Ocorreu um erro ao processar o login. Por favor, tente novamente.';
+      console.error('Login submission error:', error);
+    }
   }
 }

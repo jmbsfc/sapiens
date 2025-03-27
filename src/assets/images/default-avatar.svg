@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="100" fill="#64cbfd" />
+  
+  <!-- Person silhouette -->
+  <path d="M100,50 
+           a30,30 0 1,0 0,60
+           a30,30 0 1,0 0,-60" 
+        fill="#ffffff" />
+  
+  <!-- Body shape -->
+  <path d="M60,120 
+           Q100,180 140,120" 
+        fill="#ffffff" 
+        stroke="#ffffff" 
+        stroke-width="5" />
+</svg> 

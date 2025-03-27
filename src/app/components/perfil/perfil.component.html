@@ -1,1 +1,153 @@
-<p>perfil works!</p>
+<div class="profile-container">
+    <!-- Loading indicator -->
+    <div class="loading-indicator" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>A Carregar...</p>
+    </div>
+
+    <!-- Error message -->
+    <div class="error-message" *ngIf="error">
+        <p>{{ error }}</p>
+    </div>
+
+    <!-- Profile content when loaded -->
+    <div *ngIf="!isLoading && !error">
+        <!-- Profile header section -->
+        <div class="profile-header">
+            <div class="profile-picture">
+                <img [src]="profileImageUrl" 
+                     alt="Profile Picture" 
+                     [class.loading]="isLoading"
+                     *ngIf="profileImageUrl">
+                <div class="profile-picture-placeholder" *ngIf="!profileImageUrl">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+            <div class="profile-info">
+                <!-- Volunteer profile info -->
+                <div *ngIf="!isOrgAccount">
+                    <h1 class="profile-title">
+                        <span *ngIf="profileInfo?.firstName || profileInfo?.lastName">
+                            {{ profileInfo?.firstName || 'Nome' }} {{ profileInfo?.lastName || 'Sobrenome' }}
+                        </span>
+                        <span *ngIf="!profileInfo?.firstName && !profileInfo?.lastName">
+                            Voluntário
+                        </span>
+                    </h1>
+                    <div class="profile-details">
+                        <p *ngIf="profileInfo?.email"><i class="fas fa-envelope"></i> {{ profileInfo?.email }}</p>
+                        <p *ngIf="profileInfo?.phoneNumber"><i class="fas fa-phone"></i> {{ profileInfo?.phoneNumber }}</p>
+                        <p *ngIf="profileInfo?.birthday">
+                            <i class="fas fa-birthday-cake"></i> 
+                            <span [title]="'Data de nascimento: ' + profileInfo?.birthday">{{ formatDate(profileInfo?.birthday) }}</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Organization profile info -->
+                <div *ngIf="isOrgAccount">
+                    <h1 class="profile-title">
+                        <span *ngIf="profileInfo?.name">
+                            {{ profileInfo?.name }}
+                        </span>
+                        <span *ngIf="!profileInfo?.name">
+                            {{ profileInfo?.user?.name || 'Organização' }}
+                        </span>
+                    </h1>
+                    <div class="profile-description" *ngIf="profileInfo?.description">
+                        <p>{{ profileInfo?.description }}</p>
+                    </div>
+                    <div class="profile-details">
+                        <p *ngIf="profileInfo?.email"><i class="fas fa-envelope"></i> {{ profileInfo?.email }}</p>
+                        <p *ngIf="profileInfo?.phoneNumber"><i class="fas fa-phone"></i> {{ profileInfo?.phoneNumber }}</p>
+                        <p *ngIf="profileInfo?.website"><i class="fas fa-globe"></i> <a [href]="profileInfo?.website" target="_blank">{{ profileInfo?.website }}</a></p>
+                        <p *ngIf="profileInfo?.address"><i class="fas fa-map-marker-alt"></i> {{ profileInfo?.address }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Volunteer Applications Section -->
+        <div class="profile-section" *ngIf="!isOrgAccount">
+            <h2 class="section-title">
+                <i class="fas fa-clipboard-list"></i> Minhas Candidaturas
+            </h2>
+            
+            <div class="volunteer-applications" *ngIf="volunteerApplications.length > 0">
+                <div class="application-item" *ngFor="let application of volunteerApplications">
+                    <div class="application-content">
+                        <h3 class="application-title">{{ application.offer.title }}</h3>
+                        <div class="application-status" [ngClass]="application.status ? application.status.toLowerCase() : 'pending'">
+                            {{ application.status || 'Pendente' }}
+                        </div>
+                        <div class="application-details">
+                            <p><strong>Organização:</strong> {{ application.offer.organization?.name }}</p>
+                            <p><strong>Data:</strong> {{ formatDate(application.offer.startDate) }} - {{ formatDate(application.offer.endDate) }}</p>
+                            <p><strong>Local:</strong> {{ application.offer.address }}</p>
+                        </div>
+                        <div class="application-actions">
+                            <!-- <a [routerLink]="['/oportunidades', application.offer.id]" class="application-action-btn">
+                                <i class="fas fa-eye"></i> Ver Oportunidade
+                            </a> -->
+                            <button class="application-action-btn cancel" (click)="cancelApplication(application.id)">
+                                <i class="fas fa-times-circle"></i> Cancelar Candidatura
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="no-results" *ngIf="volunteerApplications.length === 0">
+                <h3>Sem Candidaturas</h3>
+                <p>Ainda não te candidataste a nenhuma oportunidade. Explora as oportunidades disponíveis e candidata-te!</p>
+                <a routerLink="/oportunidades" class="explore-btn">Explorar Oportunidades</a>
+            </div>
+        </div>
+
+        <!-- Organization Opportunities Section -->
+        <div class="profile-section" *ngIf="isOrgAccount">
+            <h2 class="section-title">
+                <i class="fas fa-hands-helping"></i> Oportunidades Criadas
+            </h2>
+            
+            <div class="volunteer-history" *ngIf="orgOpportunities.length > 0">
+                <div class="history-item" *ngFor="let item of orgOpportunities" [ngClass]="{'expanded': item.expanded}">
+                    <div class="history-content">
+                        <div class="history-header">
+                            <h3 class="history-title">{{ item.title }}</h3>
+                            <div class="history-expand" (click)="toggleHistoryItem(item)">
+                                <i class="fas" [ngClass]="item.expanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                            </div>
+                        </div>
+                        <p class="history-description" [ngClass]="{'expanded': item.expanded}">
+                            {{ item.description }}
+                        </p>
+                        <div class="history-details" *ngIf="item.expanded">
+                            <p><strong>Categoria:</strong> {{ item.category }}</p>
+                            <p><strong>Localização:</strong> {{ item.municipality }}</p>
+                            <p><strong>Endereço:</strong> {{ item.address }}</p>
+                            <p><strong>Data:</strong> {{ formatDate(item.startDate) }} - {{ formatDate(item.endDate) }}</p>
+                            <p><strong>Nº de Participantes:</strong> {{ item.participantsCount }}</p>
+                        </div>
+                        <div class="history-actions" *ngIf="item.expanded">
+                            <a [routerLink]="['/oportunidades', item.id, 'candidaturas']" class="action-btn view-applications">
+                                <i class="fas fa-users"></i> Ver candidaturas
+                            </a>
+                            <button class="action-btn delete-opportunity" (click)="deleteOpportunity(item.id)">
+                                <i class="fas fa-trash"></i> Eliminar oportunidade
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="no-results" *ngIf="orgOpportunities.length === 0">
+                <h3>Ainda não criou nenhuma oportunidade de voluntariado</h3>
+                <p>Ainda não criou nenhuma oportunidade de voluntariado. Crie uma oportunidade para começar a envolver voluntários!</p>
+                <div class="create-opportunity-btn">
+                    <a href="/oportunidades">Crie a sua primeira oportunidade de voluntariado</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

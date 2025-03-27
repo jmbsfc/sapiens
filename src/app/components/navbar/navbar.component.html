@@ -4,12 +4,16 @@
     </div>
     <div class="container-navbar">
         <span class="container-navbar-item">
-            <a routerLink="/oportunidades">Oportunidades</a>
+            <a routerLink="/oportunidades" routerLinkActive="active"><i class="fas fa-hands-helping"></i> Oportunidades</a>
+        </span>
+        <span class="container-navbar-item" *ngIf="isLoggedIn && isOrgAccount">
+            <a routerLink="/candidaturas" routerLinkActive="active"><i class="fas fa-users"></i> Candidaturas</a>
         </span>
         <span class="container-navbar-item">
-            <a routerLink="/perfil">Criar Conta</a>
+            <a routerLink="/perfil" routerLinkActive="active"><i class="fas fa-user-circle"></i> {{ isLoggedIn ? 'Perfil' : 'Criar Conta' }}</a>
+        </span>
+        <span class="container-navbar-item">
+            <a *ngIf="isLoggedIn" (click)="logout()"><i class="fas fa-sign-out-alt"></i> Sair</a>
         </span>
     </div>
-
-
-  </mat-toolbar>
+</mat-toolbar>

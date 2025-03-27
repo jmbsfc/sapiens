@@ -1,4 +1,191 @@
+<div class="page-header">
+    <h1>Oportunidades de Voluntariado</h1>
+    <p>Encontre oportunidades de voluntariado que combinam com seus interesses e disponibilidade</p>
+</div>
+
+<div class="dropdown-container">
+    <div *ngIf="isOrgAccount" class="create-opportunity">
+        <a (click)="openModal()">
+            <i class="fas fa-plus-circle"></i> Criar Oportunidade
+        </a>
+    </div>
+    <div class="dropdown">
+        <select class="dropdown-select" [(ngModel)]="selectedCategory">
+            <option class="dropdown-option" value="">Todas as Áreas</option>
+            <option class="dropdown-option" *ngFor="let option of categoriesData" [value]="option.id">{{option.name}}</option>
+        </select>
+    </div>
+    <div class="dropdown">
+        <select class="dropdown-select" [(ngModel)]="selectedMunicipality">
+            <option class="dropdown-option" value="">Todas as Localizações</option>
+            <option class="dropdown-option" *ngFor="let option of municipalitiesData" [value]="option.id">{{option.name}}</option>
+        </select>
+    </div>
+    <div class="apply-filter">
+        <a (click)="applyFilters()">
+            <i class="fas fa-filter"></i> Aplicar Filtros
+        </a>
+    </div>
+    <div class="apply-filter" *ngIf="selectedCategory || selectedMunicipality">
+        <a (click)="loadOpportunities()">
+            <i class="fas fa-times"></i> Limpar Filtros
+        </a>
+    </div>
+</div>
+
+<div *ngIf="isLoading" class="loading-indicator">
+    <div class="spinner"></div>
+    <p>A carregar oportunidades...</p>
+</div>
+
 <div class="container-cards">
-    <!-- os ngFor, ngIf, ngClass etc são coisas do angular que simplificam a cena -->
-    <app-card *ngFor="let card of data" [cardData]="card"></app-card>
+    <div *ngIf="data && data.length === 0" class="no-results">
+        <img src="assets/images/no-results.svg" alt="Sem resultados" onerror="this.style.display='none'">
+        <h3>Nenhuma oportunidade encontrada</h3>
+        <p>Não foram encontradas oportunidades com os filtros selecionados.</p>
+        <button class="btn-reset" (click)="loadOpportunities()">
+            <i class="fas fa-sync-alt"></i> Ver todas as oportunidades
+        </button>
+    </div>
+    <app-card *ngFor="let card of data" [cardData]="card" [isOrgAccount]="isOrgAccount" [profileInfo]="profileInfo"></app-card>
+</div>
+
+<!-- Modal for creating an opportunity -->
+<div *ngIf="isModalOpen" class="modal">
+    <div class="modal-content">
+        <span class="close" (click)="closeModal()">&times;</span>
+        
+        <div class="modal-header">
+            <h2>Criar Oportunidade</h2>
+            <p class="modal-subtitle">Preencha os detalhes da nova oportunidade de voluntariado</p>
+        </div>
+        
+        <div class="modal-body">
+            <form (ngSubmit)="onCreateOpportunity()" class="create-form" #opportunityForm="ngForm">
+                <div class="form-group">
+                    <label for="title">Título *</label>
+                    <input 
+                        type="text" 
+                        id="title"
+                        [(ngModel)]="newOpportunity.title" 
+                        name="title" 
+                        placeholder="Ex: Voluntariado para Limpeza de Praia" 
+                        required 
+                        minlength="5"
+                        #title="ngModel"
+                    />
+                    <div class="error-message" *ngIf="hasError('title')">
+                        {{ getErrorMessage('title') }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="category">Categoria *</label>
+                        <select 
+                            id="category"
+                            [(ngModel)]="newOpportunity.categoryId" 
+                            name="category" 
+                            required
+                            #category="ngModel"
+                        >
+                            <option value="" disabled selected>Selecione uma categoria</option>
+                            <option *ngFor="let option of categoriesData" [value]="option.id">{{option.name}}</option>
+                        </select>
+                        <div class="error-message" *ngIf="hasError('category')">
+                            {{ getErrorMessage('category') }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="municipality">Município *</label>
+                        <select 
+                            id="municipality"
+                            [(ngModel)]="newOpportunity.municipalityId" 
+                            name="municipality" 
+                            required
+                            #municipality="ngModel"
+                        >
+                            <option value="" disabled selected>Selecione um município</option>
+                            <option *ngFor="let option of municipalitiesData" [value]="option.id">{{option.name}}</option>
+                        </select>
+                        <div class="error-message" *ngIf="hasError('municipality')">
+                            {{ getErrorMessage('municipality') }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Endereço *</label>
+                    <input 
+                        type="text" 
+                        id="address"
+                        [(ngModel)]="newOpportunity.address" 
+                        name="address" 
+                        placeholder="Ex: Av. da República, 32, Lisboa" 
+                        required
+                        minlength="5"
+                        #address="ngModel"
+                    />
+                    <div class="error-message" *ngIf="hasError('address')">
+                        {{ getErrorMessage('address') }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Descrição *</label>
+                    <textarea 
+                        id="description"
+                        [(ngModel)]="newOpportunity.description" 
+                        name="description" 
+                        placeholder="Descreva detalhadamente a oportunidade de voluntariado..." 
+                        rows="5" 
+                        required
+                        minlength="20"
+                        #description="ngModel"
+                    ></textarea>
+                    <div class="error-message" *ngIf="hasError('description')">
+                        {{ getErrorMessage('description') }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="startDate">Data de Início *</label>
+                        <input 
+                            type="date" 
+                            id="startDate"
+                            [(ngModel)]="newOpportunity.startDate" 
+                            name="startDate" 
+                            required
+                            #startDate="ngModel"
+                        />
+                        <div class="error-message" *ngIf="hasError('startDate')">
+                            {{ getErrorMessage('startDate') }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="endDate">Data de Término *</label>
+                        <input 
+                            type="date" 
+                            id="endDate"
+                            [(ngModel)]="newOpportunity.endDate" 
+                            name="endDate" 
+                            required
+                            #endDate="ngModel"
+                        />
+                        <div class="error-message" *ngIf="hasError('endDate')">
+                            {{ getErrorMessage('endDate') }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn-create" [disabled]="!opportunityForm.form.valid">Criar Oportunidade</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>

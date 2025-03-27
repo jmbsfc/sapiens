@@ -1,13 +1,91 @@
-<div class="card">
+<div class="card" (click)="openModal()">
+    <div class="card-tag" *ngIf="isMine">
+        <p>Criada Por Si</p>
+    </div>
+    <div class="card-tag applied" *ngIf="hasApplied && !isMine">
+        <p>Já Candidatado</p>
+    </div>
     <div class="card-img">
-        <img src="https://cdn.britannica.com/70/234870-050-D4D024BB/Orange-colored-cat-yawns-displaying-teeth.jpg" />
+        <img src="cardplaceholder.png" />
     </div>
 
     <div class="card-info">
         <h3>{{cardData.title}}</h3>
         <p>{{cardData.description}}</p>
         <div class="card-location">
+            <img src="marker.png" alt="">
             <p>{{cardData.address}}</p>
+        </div>
+    </div>
+</div>
+
+<div class="modal" [class.show]="isModalOpen">
+    <div class="modal-content">
+        <span class="close" (click)="closeModal()">&times;</span>
+        
+        <div class="modal-header">
+            <h2>{{cardData.title}}</h2>
+            <div class="modal-organization">
+                <p>Organização: <span>{{cardData.organization?.name}}</span></p>
+            </div>
+        </div>
+        
+        <div class="modal-body">
+            <div class="modal-image">
+                <img src="cardplaceholder.png" alt="{{cardData.title}}">
+            </div>
+            
+            <div class="modal-details">
+                <div class="detail-item">
+                    <h3>Descrição</h3>
+                    <p>{{cardData.description}}</p>
+                </div>
+                
+                <div class="detail-item">
+                    <h3>Localização</h3>
+                    <p><img src="marker.png" alt=""> {{cardData.address}}</p>
+                    <p>Município: {{cardData.municipality?.name}}</p>
+                </div>
+                
+                <div class="detail-item">
+                    <h3>Categoria</h3>
+                    <p>{{cardData.category?.name}}</p>
+                </div>
+                
+                <div class="detail-item">
+                    <h3>Período</h3>
+                    <p>De {{formattedStartDate || 'N/A'}} a {{formattedEndDate || 'N/A'}}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <div *ngIf="isOrgAccount && isMine" class="applications-info">
+                <i class="fas fa-users"></i> {{ applications.length }} candidaturas feitas para esta oportunidade
+            </div>
+            
+            <div *ngIf="!isOrgAccount" class="application-messages">
+                <div *ngIf="applicationError" class="application-error">
+                    <i class="fas fa-exclamation-circle"></i> {{ applicationError }}
+                </div>
+                
+                <div *ngIf="hasApplied" class="application-success">
+                    <i class="fas fa-check-circle"></i> Já se candidatou a esta oportunidade
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button *ngIf="!isOrgAccount && !hasApplied" class="btn-apply" [disabled]="isApplying" (click)="applyForOpportunity()">
+                    <i class="fas fa-check-circle" *ngIf="!isApplying"></i>
+                    <i class="fas fa-spinner fa-spin" *ngIf="isApplying"></i>
+                    <span *ngIf="!isApplying">Candidatar-me</span>
+                    <span *ngIf="isApplying">A processar...</span>
+                </button>
+                
+                <button class="btn-close" (click)="closeModal()">
+                    <i class="fas fa-times"></i> Fechar
+                </button>
+            </div>
         </div>
     </div>
 </div>

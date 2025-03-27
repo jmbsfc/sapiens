@@ -1,15 +1,36 @@
 <div class="login-page-container">
-    <div class="login-container">
-        <h1>Login</h1>
-        <form (ngSubmit)="onLogin()">
-            <label for="email">Email:</label>
-            <input class="" type="email" [(ngModel)]="email" name="email" placeholder="Email" required />
+    <div class="form-container">
+        <div class="login-container">
+            <h1>Login</h1>
+            
+            <form (ngSubmit)="onLogin()">
+                <label for="email">Email:</label>
+                <input type="email" id="email" [(ngModel)]="email" name="email" placeholder="Email" required [ngClass]="{'input-error': formErrors.email}">
+                <div class="field-error" *ngIf="formErrors.email">{{ formErrors.email }}</div>
 
-            <label for="password">Password:</label>
-            <input type="password" [(ngModel)]="password" name="password" placeholder="Password" required />
+                <label for="password">Password:</label>
+                <input type="password" id="password" [(ngModel)]="password" name="password" placeholder="Password" required [ngClass]="{'input-error': formErrors.password}">
+                <div class="field-error" *ngIf="formErrors.password">{{ formErrors.password }}</div>
 
-            <button type="submit">Login</button>
-        </form>
-        <p>Don't have an account? <a href="/signup">Sign up</a></p>
+                <div class="forgot-password">
+                    <a href="javascript:void(0)" (click)="onForgotPassword()">Esqueceu-se da password?</a>
+                </div>
+
+                <button type="submit" [disabled]="isSubmitting">
+                    <span *ngIf="!isSubmitting">Login</span>
+                    <span *ngIf="isSubmitting">Processando...</span>
+                </button>
+                
+                <p>Não tem conta? <a href="/acctypepicker">Criar Conta</a></p>
+            </form>
+        </div>
+        
+        <!-- Error message container (positioned absolutely) -->
+        <div class="error-message-container" [ngClass]="{'visible': errorMessage}">
+            <div class="error-message" *ngIf="errorMessage">
+                <div class="error-message-title">Atenção</div>
+                <p>{{ errorMessage }}</p>
+            </div>
+        </div>
     </div>
 </div>
